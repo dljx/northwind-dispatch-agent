@@ -1,0 +1,100 @@
+/* Sized for the demo, not for a desk.
+   The board is on the right half of a 720p Loom recording (§5), so everything is
+   larger and higher-contrast than a real internal tool would be. Small grey text
+   is illegible at that size and the reviewer will not lean in. */
+
+:root {
+  --bg: #f6f7f9;
+  --panel: #ffffff;
+  --ink: #10151c;
+  --muted: #5b6672;
+  --line: #dfe3e8;
+  --ok: #0f7b3f;
+  --ok-bg: #e3f6ea;
+  --bad: #b31f24;
+  --bad-bg: #fdeaea;
+  --warn: #8a5a00;
+  --warn-bg: #fdf1d9;
+  --accent: #14406e;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 17px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { max-width: 1100px; margin: 0 auto; padding: 24px 22px 60px; }
+
+header.top {
+  display: flex; align-items: baseline; justify-content: space-between;
+  gap: 16px; margin-bottom: 22px; flex-wrap: wrap;
+}
+header.top h1 { font-size: 27px; margin: 0; letter-spacing: -0.02em; }
+header.top .sub { color: var(--muted); font-size: 15px; }
+
+.live {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 14px; font-weight: 600; color: var(--ok);
+}
+.live .dot {
+  width: 9px; height: 9px; border-radius: 50%; background: var(--ok);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse { 0%,100% { opacity: 1 } 50% { opacity: .25 } }
+
+h2 {
+  font-size: 14px; text-transform: uppercase; letter-spacing: .09em;
+  color: var(--muted); margin: 30px 0 12px;
+}
+
+.card {
+  background: var(--panel); border: 1px solid var(--line);
+  border-radius: 11px; padding: 17px 19px; margin-bottom: 13px;
+}
+
+.row { display: flex; justify-content: space-between; gap: 18px; flex-wrap: wrap; }
+.name { font-size: 20px; font-weight: 650; letter-spacing: -0.01em; }
+.when { font-size: 19px; font-weight: 650; color: var(--accent); white-space: nowrap; }
+.meta { color: var(--muted); font-size: 15px; margin-top: 3px; }
+.summary { margin-top: 11px; font-size: 16px; }
+
+.tag {
+  display: inline-block; padding: 3px 10px; border-radius: 999px;
+  font-size: 13px; font-weight: 700; letter-spacing: .03em;
+  text-transform: uppercase; border: 1px solid transparent;
+}
+.tag.emergency { background: var(--bad-bg); color: var(--bad); }
+.tag.same_day  { background: var(--warn-bg); color: var(--warn); }
+.tag.routine   { background: #e9edf2; color: var(--muted); }
+
+.fields {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  gap: 11px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line);
+}
+.field .k {
+  font-size: 12px; text-transform: uppercase; letter-spacing: .07em;
+  color: var(--muted); font-weight: 650;
+}
+.field .v { font-size: 16px; margin-top: 2px; word-break: break-word; }
+.field .v.empty { color: #9aa4ae; }
+
+.scorecard { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.crit {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 6px 12px; border-radius: 8px;
+  font-size: 15px; font-weight: 620; font-variant-ligatures: none;
+}
+.crit.success { background: var(--ok-bg);  color: var(--ok);  }
+.crit.failure { background: var(--bad-bg); color: var(--bad); }
+.crit.unknown { background: #eceff3;       color: var(--muted); }
+.crit .mark { font-size: 15px; }
+
+.empty-state {
+  background: var(--panel); border: 1px dashed var(--line);
+  border-radius: 11px; padding: 30px; text-align: center; color: var(--muted);
+}
