@@ -62,6 +62,24 @@ Knowledge base, RAG enabled, `usage_mode: auto`:
 Six data collection fields and four evaluation criteria are configured and were confirmed
 present on a read-back after creation.
 
+Post-call webhook `f3b2c61cf9854506a149ce20c5486041`, HMAC auth, attached to the
+workspace `post_call_webhook_id` slot. Its secret is in `.env.local` and in Vercel
+production as `ELEVENLABS_WEBHOOK_SECRET`.
+
+### Three gates guard the personalized open, and all three fail silently
+
+Getting the conversation-init webhook to actually fire needs all of these true. Any one of
+them left false produces the generic greeting with no error anywhere:
+
+| Setting | Where |
+| --- | --- |
+| `conversation_initiation_client_data_webhook.url` | workspace settings |
+| `overrides.enable_conversation_initiation_client_data_from_webhook` | agent, Security tab |
+| `overrides.conversation_config_override.agent.first_message` | agent, Security tab |
+
+All three default to unset/false and were switched on via the API. Re-check them after any
+dashboard edit — this is the failure that costs you a take.
+
 ## Cal.com
 
 | | |
@@ -95,3 +113,4 @@ All of these were pasted into a chat transcript:
 - Vercel token (`vcp_…`) — account-wide, no project scoping
 - Cal.com API key (`cal_live_…`)
 - ElevenLabs API key (`sk_…`)
+- ElevenLabs post-call webhook secret (`wsec_…`)
