@@ -62,8 +62,9 @@ Only the Cal.com booking is awaited, because only it is needed to speak the conf
 ```sql
 customers (
   id uuid primary key,
-  phone text unique not null,
+  phone text unique not null,    -- E.164, must match Twilio caller_id exactly
   name text not null,
+  email text,                    -- confirmation target; null for unknown callers
   service_address text not null,
   service_plan text,             -- e.g. Comfort Plan, null for non-members
   created_at timestamptz default now()
@@ -102,6 +103,10 @@ calls (
 The enums are declared twice on purpose. Tool schemas stop the model inventing a category; the CHECK constraints stop everything else — a hand-fixed row, a replayed webhook, a later script — from doing the same. A rule worth stating in a prompt is worth enforcing in the column.
 
 `calls.customer_id` resolves without an extra lookup: the post-call payload carries `conversation_initiation_client_data.dynamic_variables`, so the customer id set during the ring comes back at the end of the call.
+
+`customers.email` exists because confirmations go out by email rather than SMS (§6), and it is nullable because the alternative is worse. Collecting an address by voice — spelling a domain letter by letter to a stressed caller at 11pm — costs more than the confirmation is worth. Unknown callers therefore get a verbal confirmation only. Known customers, which is the demo path, get the email.
+
+**RLS is on, with no policies, which denies everything.** The app reads and writes with the service role key and bypasses it. This is not the same cut as the unauthenticated dispatch board in §8: that cut makes one page public, whereas leaving RLS off would make the entire PostgREST surface readable by anyone holding the anon key — and that key reaches the browser the moment the board queries Supabase directly. The board reads through a server route. An accepted cut should stay the size it was accepted at.
 
 ### 3.3 Configuration
 
@@ -144,6 +149,8 @@ Built in the visual Workflow builder, which serializes into `conversation_config
 4. **Out of scope or frustrated caller** → `transfer_to_number` to a human.
 
 The first message branches on `is_known_customer`, so unknown callers get a clean generic greeting rather than an awkward personalization failure.
+
+The branch is evaluated in the webhook, not in the prompt. `/api/conversation-init` already knows the answer, so it returns the finished greeting as a `first_message` override and the model is never given the opportunity to improvise a personalization failure — the exact failure the branch exists to prevent. This requires adding `first_message` to the overridable fields in the agent's Security tab.
 
 That branch is load-bearing for the widget, not just an edge case. The conversation-initiation webhook is Twilio-inbound-only — there is no caller ID on a web session, so widget conversations always arrive with `is_known_customer = false` and take the generic greeting. The widget is therefore a legitimate fallback demo surface, but it cannot show the personalized-open beat. Plan the recording accordingly.
 
