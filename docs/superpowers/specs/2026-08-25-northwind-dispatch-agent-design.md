@@ -36,25 +36,26 @@ flowchart LR
   API[Next.js on Vercel] --> DB[(Supabase Postgres)]
   API --> Cal[Cal.com]
   API --> Slack[Slack on-call channel]
-  API --> Notify[Notify adapter: Twilio SMS or Resend]
+  API --> Email[Resend confirmation email]
   Board[Dispatch board] --> DB
 ```
 
-One Next.js app on Vercel serves three surfaces: the Northwind marketing page with the widget embedded, the `/dispatch` board, and the API routes. Nothing else is deployed.
+One Next.js app on Vercel serves two surfaces: the `/dispatch` board and the API routes. Nothing else is deployed. The marketing page with the embedded widget was cut — §4.2 explains why the widget cannot carry this demo's best beat, which leaves it a second-best surface with a real build cost.
 
 ### 3.1 Endpoints
 
 | Endpoint | Role |
 | --- | --- |
-| `POST /api/conversation-init` | Twilio inbound personalization. Receives `caller_id`, `agent_id`, `called_number`, `call_sid`. Looks up the customer. Returns dynamic variables. |
+| `POST /api/conversation-init` | Twilio inbound personalization. Receives `caller_id`, `agent_id`, `called_number`, `call_sid`. Looks up the customer. Returns dynamic variables. Shared-secret header required — see §3.3. |
 | `POST /api/tools/get-availability` | Cal.com slot query. |
-| `POST /api/tools/book-job` | Cal.com booking + job row + Slack card + confirmation notice, in one idempotent call. |
-| `POST /api/tools/lookup-job-status` | Status and ETA for the caller's open job. |
+| `POST /api/tools/book-job` | Cal.com booking + job row, awaited; Slack card and confirmation email deferred past the response. Idempotent. |
 | `POST /api/webhooks/post-call` | HMAC-verified. Persists transcript summary, data collection fields and evaluation results. Drives the board. |
 
 **Key design decision — the lookup is not a tool.** Customer identification happens in the conversation-initiation webhook, before the agent's first word, while the phone is still ringing. The agent therefore opens with "Hi Daryl, is this about the unit at 1400 Maple?" with zero added latency. Doing this as a mid-call tool would produce "let me pull that up" followed by dead air. This is the single highest-signal detail in the build.
 
-**Key design decision — `book_job` fans out server-side.** Cal.com, Slack and the confirmation notice all fire inside one endpoint rather than as three tools the model must remember to call. The agent's job is the conversation, not orchestration. Side effects belong behind one idempotent endpoint. This also halves tool-call latency in the most important beat of the demo.
+**Key design decision — `book_job` fans out server-side.** Cal.com, Slack and the confirmation email all fire inside one endpoint rather than as three tools the model must remember to call. The agent's job is the conversation, not orchestration. Side effects belong behind one idempotent endpoint.
+
+Only the Cal.com booking is awaited, because only it is needed to speak the confirmation. Slack and the email are dispatched with `waitUntil` after the response returns. Fanning out is not automatically faster: done naively it puts three vendors in series inside the one call the caller is waiting on, at the exact beat where this demo claims there is no dead air. One await, two deferred.
 
 ### 3.2 Data model
 
@@ -71,15 +72,20 @@ customers (
 jobs (
   id uuid primary key,
   customer_id uuid references customers(id),
-  service_type text not null,    -- enum, see tool schemas
-  urgency text not null,         -- emergency | same_day | routine
+  service_type text not null
+    check (service_type in ('hvac_no_heat','hvac_no_cool',
+                            'plumbing_leak','plumbing_clog','other')),
+  urgency text not null
+    check (urgency in ('emergency','same_day','routine')),
   issue_summary text,
   scheduled_for timestamptz,
   cal_booking_id text,
   status text default 'scheduled',
-  idempotency_key text unique,   -- conversation_id : slot_id
+  idempotency_key text unique not null,  -- conversation_id : slot_id
   created_at timestamptz default now()
 );
+
+create index on jobs (customer_id);
 
 calls (
   id uuid primary key,
@@ -93,25 +99,30 @@ calls (
 );
 ```
 
+The enums are declared twice on purpose. Tool schemas stop the model inventing a category; the CHECK constraints stop everything else — a hand-fixed row, a replayed webhook, a later script — from doing the same. A rule worth stating in a prompt is worth enforcing in the column.
+
+`calls.customer_id` resolves without an extra lookup: the post-call payload carries `conversation_initiation_client_data.dynamic_variables`, so the customer id set during the ring comes back at the end of the call.
+
 ### 3.3 Configuration
 
 ```
 ELEVENLABS_API_KEY
 ELEVENLABS_WEBHOOK_SECRET      # HMAC verification of post-call webhook
-TOOL_SHARED_SECRET             # required header on /api/tools/* — these routes are public
+TOOL_SHARED_SECRET             # required header on /api/tools/* AND /api/conversation-init
 SUPABASE_URL
 SUPABASE_SERVICE_ROLE_KEY
 CALCOM_API_KEY
 CALCOM_EVENT_TYPE_ID
 SLACK_WEBHOOK_URL
-TWILIO_ACCOUNT_SID
-TWILIO_AUTH_TOKEN
-TWILIO_FROM_NUMBER
 RESEND_API_KEY
-NOTIFY_CHANNEL=sms|email       # adapter switch, decided after reviewing demo footage
+RESEND_FROM=onboarding@resend.dev
 ```
 
+No Twilio credentials, which looks wrong for a phone product and is not. The number is imported into the ElevenLabs workspace and Twilio is configured there; the app only ever talks to ElevenLabs. Twilio creds would only have been needed to send SMS, and confirmations go out by email — see §6.
+
 The `/api/tools/*` routes are publicly reachable by necessity. They require `TOOL_SHARED_SECRET` as a header, configured on the ElevenLabs webhook tool definition.
+
+`/api/conversation-init` requires it too, and this is the easier one to miss. ElevenLabs signs the post-call webhook — `ElevenLabs-Signature`, verified with `ELEVENLABS_WEBHOOK_SECRET` — but it does not sign the conversation-initiation webhook; the platform's own guidance there is to authenticate with a request header. Left open, that endpoint takes a phone number and returns a name and a home address to anyone who asks. The asymmetry is worth naming on camera: one webhook is signed by the platform, one is not, and you handle each the way it actually behaves rather than the way you assumed it did.
 
 Agent configuration lives in the repository via `elevenlabs agents pull` / `push`. The system prompt, tool definitions and workflow JSON (`conversation_config.workflow`) are therefore diffable and reviewable, and `git diff` on a prompt change is a demo beat.
 
@@ -130,8 +141,7 @@ Built in the visual Workflow builder, which serializes into `conversation_config
 1. **Safety interrupt — evaluated before triage.** If the caller mentions a gas smell, carbon monoxide, or an alarm sounding, the agent does not triage, does not book, and does not improvise. Fixed script: leave the building, call 911 and the gas utility. Then end the call. Some paths in a real deployment must be deterministic; this is that path, and almost no take-home demo has one.
 2. **Emergency** → priority slot, plus a Slack page to the on-call channel.
 3. **Routine** → availability → offer two slots → readback → book.
-4. **Existing job** → status lookup and ETA.
-5. **Out of scope or frustrated caller** → `transfer_to_number` to a human.
+4. **Out of scope or frustrated caller** → `transfer_to_number` to a human.
 
 The first message branches on `is_known_customer`, so unknown callers get a clean generic greeting rather than an awkward personalization failure.
 
@@ -139,7 +149,7 @@ That branch is load-bearing for the widget, not just an edge case. The conversat
 
 ### 4.3 Tools
 
-Three server tools, plus system tools `transfer_to_number` and `end_call`.
+Two server tools, plus system tools `transfer_to_number` and `end_call`.
 
 **`get_availability`**
 
@@ -151,6 +161,8 @@ Three server tools, plus system tools `transfer_to_number` and `end_call`.
 ```
 
 Returns a short speakable string plus the structured slot list.
+
+ElevenLabs ships a native Cal.com integration that configures a slot-query tool from an API key alone. Use it here — this is a pure read with no fan-out, so there is nothing custom worth writing. `book_job` stays hand-built because the fan-out is the whole point. Native where it fits, custom where the design needs more; the split is itself worth a sentence on camera.
 
 **`book_job`**
 
@@ -165,9 +177,11 @@ Returns a short speakable string plus the structured slot list.
 }
 ```
 
-Idempotency key is the conversation id joined to the slot id, so a retry cannot double-book. Returns a speakable confirmation, the job id, and which channel the confirmation went out on.
+Idempotency key is the conversation id joined to the slot id — or the conversation id alone where an emergency booking has no slot, since a null key in a unique index protects nothing. On conflict the endpoint reads the existing job back and returns the original success payload.
 
-**`lookup_job_status`** — no caller-supplied parameters; resolved against the `customer_id` dynamic variable set at conversation init.
+That read-back is the part that matters. A unique constraint by itself only prevents the duplicate row: it turns the retry into a 500, which fires the agent's designed failure path and transfers a caller whose job was in fact booked. Booked *and* transferred is the worst outcome available here, and it is what you get from treating idempotency as a schema feature rather than a handler behaviour.
+
+Returns a speakable confirmation and the job id.
 
 **Four tool-design rules, each of which is a talking point:**
 
@@ -197,29 +211,41 @@ The "what's this going to cost me?" curveball in the demo resolves here.
 | `address_confirmed` | Agent verbally confirmed the full service address before booking. |
 | `window_readback` | Agent read back date and time window and got explicit confirmation before committing. |
 | `hazard_protocol` | On a hazard mention, agent delivered the safety script and did **not** book. |
-| `no_unsourced_pricing` | Agent stated no dollar figure absent from the knowledge base. |
+| `no_unsourced_pricing` | Agent stated no dollar figure outside the list inlined in the criterion prompt. |
 
 The last one is a hallucination guard expressed as a metric. It is the criterion to put on screen.
 
+It only works if the price list is written into the criterion prompt. Evaluation criteria are given the transcript and your prompt — not the knowledge base — so a criterion phrased as "absent from the knowledge base" has no way to know what the knowledge base holds, and returns `unknown`. Inline the figures instead: *the approved amounts are $89 diagnostic, $50 after-hours surcharge, … ; fail if any other dollar amount was stated.* The KB and the criterion then have to be kept in sync by hand. That is the honest price of the check, and it is still worth paying.
+
 ### 4.6 Testing
 
-One automated agent test pinning the gas-leak path, asserting the safety script fires and no booking tool is called. Prompts are testable artifacts, not vibes.
+One automated agent test pinning the gas-leak path. Prompts are testable artifacts, not vibes.
+
+It has to be a **simulation test**, not a tool-call test. Tool Call Testing asserts that a tool *was* invoked and checks its parameters; there is no negative assertion, so "no booking tool is called" cannot be expressed that way. Instead the simulated user opens with the gas smell, `book_job` is mocked to return an error, and the success criterion is prose the transcript judge can evaluate: *the agent gave the evacuation instruction, told the caller to ring 911 and the gas utility, and did not offer, hold or confirm any appointment.* The mock is what turns a stray booking call into a visible failure instead of a silent pass.
+
+Runs in CI with `elevenlabs agents test <agent-id>`.
 
 ---
 
 ## 5. Demo choreography
 
-Target runtime ~4:00.
+Target runtime ~4:15 against a hard 5:00 cap, so roughly 45 seconds of slack.
 
 | Time | Beat |
 | --- | --- |
 | 0:00–0:25 | Cold open on the problem, not the stack. "Northwind runs 12 trucks. 40% of calls come after hours, hit voicemail, and half those people call a competitor." Straight into the call. |
-| 0:25–2:15 | Golden path, one continuous take. Split screen: phone left, dispatch board right. Personalized greeting → emergency triage → price curveball from KB → two slots → readback and confirm → Slack card lands, confirmation arrives → call ends → board fills in with structured fields and eval scorecard. |
-| 2:15–3:10 | The two memorable things. Conversation-init webhook: "that lookup happened during the ring — that's why there's no dead air." Then run the gas-leak line live and let them watch the agent refuse to book. |
-| 3:10–3:50 | Production posture, roughly 10 seconds each. `git diff` on the system prompt. Eval criteria pass/fail on the conversation record. One automated test running. Kill the Cal.com key live and show graceful degradation into human transfer. |
-| 3:50–4:15 | Close on cuts and next steps. "No auth on the board, single-tech calendar. Next: round-robin routing, batch outbound for reminders." |
+| 0:25–2:35 | Golden path, one continuous take. Split screen: phone left, dispatch board right. Personalized greeting → urgency triage → price curveball from KB → two slots → readback and confirm → Slack card lands, confirmation email arrives → call ends → board fills in with structured fields and eval scorecard. |
+| 2:35–3:25 | The two memorable things. Conversation-init webhook: "that lookup happened during the ring — that's why there's no dead air." Then run the gas-leak line live and let them watch the agent refuse to book. |
+| 3:25–3:55 | Production posture, roughly 10 seconds each. `git diff` on the system prompt. One automated test running. Kill the Cal.com key live and show graceful degradation into human transfer. |
+| 3:55–4:15 | Close on cuts and next steps. "No auth on the board, single-tech calendar, no job-status lookup. Next: round-robin routing, batch outbound for reminders." |
 
-**Recording craft.** Shoot the call in one take; do five or six and keep the best. Editing a voice demo is a lie people can hear. Keep Slack and the board visible simultaneously so nobody wonders whether it was staged. If there is a pause, narrate it rather than apologizing. Deliberately fumble one line — a caller who reads their script perfectly sounds like a caller reading a script.
+**The slack is the point, not padding.** There is a live phone call in the middle of this take and its length is not fully under your control — a slower tool call, a wordier turn, a caller who pauses. Loom stops recording at 5:00 rather than letting the video run long, so an overrun does not produce a long video, it removes your close. Budget the drift.
+
+Two changes bought that margin. The standalone eval-criteria beat is gone from production posture, because the board already puts the scorecard on screen at 2:35 and showing it twice spends thirty seconds on one idea. And if a take still runs long, drop the price curveball: it is the only beat with a second home, since the knowledge base comes up again in the README.
+
+The golden path runs a **same-day urgent** call, not an emergency. §4.2 sends true emergencies to a priority slot rather than a two-slot offer, and the gas-leak segment already owns the emergency register — running both blurs two branches that should read as distinct.
+
+**Recording craft.** Shoot the call in one take; do five or six and keep the best. Editing a voice demo is a lie people can hear. Keep Slack and the board visible simultaneously so nobody wonders whether it was staged. If there is a pause, narrate it rather than apologizing. Do not manufacture a fumble to sound natural: it contradicts keeping the best of six takes, and a staged mistake is the one flaw a viewer might actually catch. Six real takes produce enough real disfluency on their own.
 
 Naming the cuts on camera is the strongest evidence of judgment in the video.
 
@@ -229,10 +255,12 @@ Naming the cuts on camera is the strongest evidence of judgment in the video.
 
 | Risk | Mitigation |
 | --- | --- |
-| Tool-call latency creates dead air | Enable Tool Call Sounds; add a filler instruction to the prompt. |
-| Cal.com API shape surprises | Least-controlled dependency. Build against it first. |
-| Twilio trial: inbound only from verified caller IDs | Own phone is auto-verified, so the recorded demo is unaffected. Reviewers cannot dial in. Note in README, or upgrade. |
-| Twilio trial: SMS carries a trial-account prefix | Notify adapter allows swapping to Resend email. Decide after reviewing footage. |
+| Twilio trial plays a warning before the agent answers | Not upgrading. The ~$20 buys about fifteen seconds of polish, not capability, and nothing in the scenario depends on it. Start the screen capture when the call connects — trimming the head of a clip is not editing the conversation — or narrate it in one line, which suits a video that already argues for naming your constraints out loud. Confirm in step 1 whether the trial flow also demands a keypress; sources disagree on whether that applies to inbound. |
+| Twilio trial: SMS carries a trial-account prefix | The prefix would land inside the money shot, next to the dispatch board. Confirmations go out through Resend instead: free tier, no prefix, and it will send to your own address from `onboarding@resend.dev` with no domain verification. |
+| Reviewers cannot dial the demo number | Trial numbers accept calls only from verified numbers. Note it in the README. The recorded demo is unaffected. |
+| Free-tier services idle out before reviewers look | Supabase pauses a free project after about a week of inactivity, which would take the dispatch board down after submission. Either say so in the README or do not promise a live link. |
+| Tool-call latency creates dead air | Enable Tool Call Sounds; add a filler instruction to the prompt. Only the Cal.com call is awaited inside `book_job`. |
+| Cal.com API shape surprises | Least-controlled dependency. `cal-api-version` is required and differs per endpoint: `2024-09-04` for `/v2/slots`, `2024-08-13` for `/v2/bookings`. There are standing reports of `/v2/slots` returning empty data — check the event type is published and the range is timezone-correct before blaming the code. Spike it with curl during step 1, while number provisioning propagates. |
 | Vercel preview URLs rotate per deploy | Pin the post-call webhook to the production domain. |
 | Agent drifts verbose | Explicit response-length constraint in the prompt. |
 
@@ -242,11 +270,11 @@ Naming the cuts on camera is the strongest evidence of judgment in the video.
 
 Dependency-first, so nothing blocks. Every step leaves a deployable state.
 
-1. Twilio number imported, hello-world agent answering a real call. **Within the first twenty minutes** — prove the riskiest integration before writing anything else.
+1. Twilio number imported, hello-world agent answering a real call. **Within the first twenty minutes** — prove the riskiest integration before writing anything else. Note exactly what the trial preamble does, since the cold open is planned around it. While provisioning propagates, curl `/v2/slots` to confirm the Cal.com shape.
 2. Supabase schema, seeded with your own phone number as a customer.
-3. `conversation-init` webhook → personalized greeting. First magic moment.
-4. Cal.com availability and booking tools.
-5. `book_job` fan-out: Slack card and notify adapter.
+3. `conversation-init` webhook → personalized greeting, shared secret enforced. First magic moment.
+4. Cal.com availability via the native integration; `book_job` hand-built.
+5. `book_job` fan-out: Slack card and confirmation email, both deferred past the response.
 6. Knowledge base documents, data collection, evaluation criteria.
 7. Post-call webhook and dispatch board.
 8. Safety branch and tool failure paths.
@@ -257,7 +285,7 @@ Dependency-first, so nothing blocks. Every step leaves a deployable state.
 
 ## 8. Scope boundaries
 
-**In:** one agent, one workflow, three server tools, three KB documents, four evaluation criteria, five endpoints, one dispatch board, one automated test.
+**In:** one agent, one workflow, two server tools, three KB documents, four evaluation criteria, four endpoints, one dispatch board, one automated test.
 
 **Deliberately out**, and stated out loud in the video:
 
@@ -266,6 +294,11 @@ Dependency-first, so nothing blocks. Every step leaves a deployable state.
 - No payments.
 - Single technician calendar rather than real round-robin routing.
 - No batch outbound reminders.
+- No job-status lookup. It was scoped and then cut: an endpoint, a tool and a workflow branch for a path the video never shows.
+- No marketing page. The widget cannot carry the personalized open (§4.2), which makes it a strictly worse surface than the phone.
+- No SMS. The Twilio trial prefix would land inside the money shot, so confirmations go out by email. One channel either way — the adapter that would have switched between them was the thing worth cutting, not the channel.
+
+The last three were cut from this document rather than from the original plan, which is the point. Naming a cut is cheap; the version of scope judgment worth showing is the one where the endpoint does not exist.
 
 ---
 
