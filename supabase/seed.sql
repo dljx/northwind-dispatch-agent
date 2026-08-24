@@ -4,6 +4,11 @@
 -- Fill in your own number before running. It must be E.164 and must match the phone you
 -- will dial from, or the personalized-open beat — the best thing in the build — will not
 -- fire. On a Twilio trial that same number also has to be a verified caller ID.
+--
+-- E.164 means no spaces, no dashes, no parentheses: +15551234567, never +65 93678191.
+-- The lookup is an exact string match against the caller_id Twilio sends, so a single
+-- space is the difference between "Hi Daryl" and the generic greeting — and it fails
+-- silently, on camera, with no error anywhere to tell you why.
 
 insert into customers (phone, name, email, service_address, service_plan) values
   ('+1XXXXXXXXXX', 'Daryl Lee',   'you@example.com',   '1400 Maple Ave, Edina, MN 55424',      'Comfort Plan'),
