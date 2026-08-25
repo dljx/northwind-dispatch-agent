@@ -3,6 +3,24 @@
 Non-secret identifiers for everything standing up behind this demo. Secrets live in
 `.env.local` (gitignored) and in Vercel's production environment.
 
+## Dashboards
+
+| What | Where |
+| --- | --- |
+| **Agent** (voice, prompt, workflow, tests) | https://elevenlabs.io/app/agents/agent_4101m0tmxbskew3ref0cm9p37qm3 |
+| ElevenLabs agents list, if that deep link moves | https://elevenlabs.io/app/agents |
+| ElevenLabs workspace settings (webhooks, secrets) | https://elevenlabs.io/app/agents/settings |
+| Vercel project | https://vercel.com/daryllee97-2695/northwind-dispatch |
+| Supabase project | https://supabase.com/dashboard/project/jbsdiopounznzlsczbaz |
+| Supabase SQL editor | https://supabase.com/dashboard/project/jbsdiopounznzlsczbaz/sql |
+| Cal.com event type (Northwind Service Visit) | https://app.cal.com/event-types/6799125 |
+| Cal.com availability (Chicago schedule) | https://app.cal.com/availability/2279724 |
+| Cal.com bookings, to clear test debris | https://app.cal.com/bookings/upcoming |
+| Resend, to confirm mail actually sent | https://resend.com/emails |
+| Twilio console | https://console.twilio.com |
+| **The demo itself** | https://northwind-dispatch.vercel.app |
+| The board | https://northwind-dispatch.vercel.app/dispatch |
+
 ## Vercel
 
 | | |
