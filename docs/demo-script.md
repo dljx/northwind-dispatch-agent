@@ -1,10 +1,10 @@
 # Demo script
 
-Word for word, with tab cues. Target **4:49** against a hard 5:00 cap, taking Option A at the test segment.
+Word for word, with tab cues. Target **4:45** against a hard 5:00 cap, taking Option A at the test segment.
 
 Narration is ~139 seconds of it, measured. The two live conversations are the other ~150, and they
 are the part you do not control — so the narration is written tight on purpose. Read it
-as written and you land around 4:49. Improvise an extra sentence per segment and you are
+as written and you land around 4:45. Improvise an extra sentence per segment and you are
 over the cap with the close cut off.
 
 Two voices in this recording and it matters that they sound different:
@@ -109,8 +109,12 @@ Let that land for a full second before you answer. It is the best moment in the 
 >
 > **CALLER:** "And what's this going to cost me?"
 >
-> *(she quotes the after-hours diagnostic — $149 — from the knowledge base, and does not
-> invent anything around it)*
+> *(she calls get_pricing and answers: your Comfort Plan covers it, no call-out fee)*
+>
+> **CALLER:** "And what if it needs a part?"
+>
+> *(get_pricing again — AC refrigerant leak repair, four hundred to fifteen hundred, as a
+> range, not a guess inside one)*
 >
 > *(she confirms the address)*
 >
@@ -145,15 +149,13 @@ Quick. Six seconds a tab. You are answering "is any of this actually wired up?"
 
 Then, still on the board, point at the scorecard:
 
-> "That price came out of a RAG document — the pricing sheet is in her knowledge base.
-> And 'no unsourced pricing' there is the guard on it: it fails any call where she quotes
-> a figure that isn't in one of those documents."
+> "She didn't recall that price, she looked it up — pricing is a tool against Postgres,
+> not a document. That's how she knew his plan waives the call-out fee. And 'no unsourced
+> pricing' there fails the call if she states a figure that isn't in the table."
 
-Then the design point, which is the actual reason to show it:
-
-> "That was one tool call, but only the calendar write made her wait. Slack and the email
-> went out after she'd already answered. Wait on all three and the caller sits in silence
-> for as long as the slowest one takes."
+*(The fan-out point — that only the calendar write is awaited and Slack and email are
+deferred — is cut for time. It is in the README, and it is the least visible of the three
+ideas this segment could carry.)*
 
 **→ TAB 1**
 
@@ -194,14 +196,15 @@ Then:
 ## 3:45–4:15 · The test  → **TAB 7**  ·  PICK ONE
 
 **You cannot keep this in full and also keep the price beat.** Measured: with this segment
-the video is **5:19**, nineteen seconds over the cap. Without it, **4:49**. Choose before
+the video is **5:15**, fifteen seconds over the cap. Without it, **4:45**. Choose before
 you record, not during.
 
-**Option A — cut it (recommended).** Lands at 4:49 with eleven seconds of slack. The
-two-bugs story is in the README, which reviewers read. What you keep instead is the
-knowledge base and the hallucination guard, which is the more distinctive thing: plenty of
-candidates write a test, almost none express a hallucination guard as a pass/fail metric
-tied to a RAG document.
+**Option A — cut it (recommended).** The two-bugs story is in the README, which reviewers
+read. What you keep instead is the pricing beat: a tool that knows the caller is on a plan
+and waives his fee, plus a pass/fail metric that fails the call if she states a figure
+that is not in the table — or answers a money question without checking at all. Plenty of
+candidates write a test. Almost nobody wires a hallucination guard to the same source the
+answer came from.
 
 **Option B — compress it to one sentence**, folded into the end of the safety segment
 instead of its own tab. Lands around 4:53, seven seconds of slack. Say only:
@@ -209,9 +212,9 @@ instead of its own tab. Lands around 4:53, seven seconds of slack. Say only:
 > "There's an automated test pinning this path — it's what caught the two bugs that made
 > it work."
 
-**Option C — keep it in full and cut the price beat instead.** Only if you would rather
-show engineering rigour than platform features. I would not: RAG is a core part of the
-product you are demoing to its own team.
+**Option C — keep it in full and cut the price beat instead.** I would not. The price beat
+is the only place the video shows a tool reading live customer state and changing its
+answer because of it, which is the whole argument for the architecture.
 
 The full version follows, for Option C.
 

@@ -2,11 +2,13 @@
 
 Three documents, uploaded to the ElevenLabs agent with RAG enabled.
 
-**Upload these three only:**
+**Upload these two only:**
 
 - `01-service-area.md`
-- `02-pricing.md`
 - `03-policies.md`
+
+`02-pricing.md` is a tombstone, not a document. Pricing moved to the `pricing` table and
+the `get_pricing` tool — see the file for why.
 
 This README is not part of the knowledge base. Do not upload it — anything in the RAG
 index is retrievable, so notes-about-the-notes end up quotable by the agent.
@@ -23,13 +25,13 @@ paraphrase it, which is the one thing that must not happen on that path.
 tools (§4.3). A schedule baked into a RAG document is a demo that lies to customers next
 Tuesday.
 
-## Pricing figures are load-bearing twice
+## Why pricing left
 
-Every dollar amount in `02-pricing.md` is also inlined into the `no_unsourced_pricing`
-evaluation criterion, because evaluation criteria receive the transcript and their own
-prompt — not the knowledge base — and so cannot check a figure against a document they
-never see.
+Every dollar amount had to be inlined into the `no_unsourced_pricing` criterion, because
+criteria see the transcript and their own prompt — never the knowledge base. Two copies of
+the same numbers, kept in sync by hand, is a guard that starts failing correct answers the
+first time someone edits one of them.
 
-That means the two have to be edited together. If you change a price here and not in the
-criterion, the criterion starts failing correct answers, which is worse than not having
-it: a red scorecard on screen that is wrong about why.
+Numbers that must be duplicated to be checked want to be structured data. Pricing is now a
+table, and `agent/sync-pricing-criterion.py` generates the criterion from it, so there is
+one source and one command.

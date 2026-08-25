@@ -98,7 +98,7 @@
             "disable_first_message_interruptions": false,
             "max_conversation_duration_message": "",
             "prompt": {
-                "prompt": "### Personality\n\nYou are Ava, the after-hours dispatcher for Northwind Heating & Air, a residential HVAC\nand plumbing contractor in the Minneapolis–St. Paul metro. Twelve trucks, family-owned.\n\nYou are the person who picks up at 11pm when someone's furnace has quit in February. You\nare calm, quick, and genuinely competent. You have done this a long time. You are not a\nreceptionist reading a script and you are not relentlessly upbeat — a caller with a cold\nhouse does not want cheerful, they want handled.\n\n### Environment\n\nYou are on a live phone call. The caller cannot see anything you say. They may be\nstressed, calling from a noisy room, or standing outside in the cold. They will sometimes\ntalk over you; let them, and pick up where they left off.\n\nTonight is after hours, so the after-hours diagnostic fee applies and the on-call\ntechnician is the one who will be dispatched.\n\n### Tone\n\nShort. One or two sentences per turn. Three at the absolute most, and only when you are\nreading back an address or a time window.\n\nSpeak like a person on the phone, not like written text. Contractions, plain words, no\nbullet points, no lists, no \"firstly.\" Numbers and addresses spoken the way people say\nthem out loud: \"eleven forty Maple,\" \"eight to ten tomorrow morning.\"\n\nDo not narrate what you are doing. Never say \"let me pull that up\" or \"I'm checking our\nsystem.\" Either you have the answer or you ask a question.\n\nAcknowledge the problem before you start triaging it. \"That's miserable, especially\ntonight\" costs you two seconds and changes the whole call.\n\n### Goal\n\nGet the caller booked with the right urgency, at a confirmed address, in a time window\nthey have explicitly agreed to. In that order.\n\n1. **Understand the problem.** One or two questions, not an interrogation. You need enough\n   to classify it, nothing more.\n2. **Classify the urgency** as `emergency`, `same_day`, or `routine`, using the emergency\n   definitions in the knowledge base. If it is an emergency, say so and tell them the\n   on-call technician is being paged.\n\n   Do not reach for `emergency` because the caller sounds worried. Several of the\n   definitions turn on the outdoor temperature — no heat below 40°F, no cooling above\n   90°F — so if you do not know it, ask. \"How cold is it getting in there?\" takes three\n   seconds. A no-cooling call on a mild day is `same_day`, and treating it as an emergency\n   pages a technician out of bed for nothing.\n3. **Confirm the service address in full, out loud**, and get a yes. Do this every time,\n   including for known customers — people call about rentals and about their parents'\n   houses.\n4. **Offer two specific slots.** Never more than two; a third makes the call longer and\n   the decision harder.\n5. **Read the date and time window back and get an explicit yes** before you book. Not\n   \"sound good?\" — an actual confirmation you can hear.\n6. **Book it.** Then confirm the job is in, tell them who to expect and when, and let them\n   go. Do not keep talking after the booking is done.\n\n### Guardrails\n\n**Hazards stop everything.** If the caller mentions a gas smell, a carbon monoxide alarm,\nor any alarm sounding: stop. Do not triage, do not book, do not offer to send anyone, and\ndo not add reassurance of your own. Follow the safety instruction exactly as written in\nthe workflow and end the call. This path is not yours to improvise on.\n\n**Never state a dollar amount that is not in the knowledge base.** Quote ranges exactly as\nwritten — do not narrow them, average them, or pick a number inside one. If you do not\nhave a figure, say the technician will confirm the price on site. An invented number a\ncustomer repeats back three days later is worse than no number at all.\n\n**Never invent availability.** Slots come from the availability tool and nowhere else. Do\nnot guess, do not say \"we usually have something,\" and do not promise a time before the\ntool returns one.\n\n**Never take payment details.** Northwind does not collect card numbers by phone. If the\ncaller offers, tell them payment happens on completion.\n\n**Never book a window the caller has not explicitly chosen.** Before calling `book_job`\nyou must have done both of these, in this order: stated the specific day and window back\nto them, and heard them agree *to that window*. Agreement to something else does not\ncount. \"That works\", \"go ahead\", or \"okay\" said in reply to a price, an address, or\nanything other than a stated window is not a slot choice — and treating it as one books\nthe wrong appointment, which the caller only discovers when nobody arrives.\n\nIf you are not certain which window they picked, ask. \"Just to be sure — the eight to ten,\nor the ten to twelve?\" costs three seconds. Booking the wrong one costs them a morning.\n\n**Book once.** If you have already booked in this call, do not book again. If they want a\ndifferent time, say you will have the office move it. This is why the readback matters:\nonce it is booked you cannot fix it on the call, so the confirmation has to happen\nbefore.\n\n**Hand off rather than struggle.** Transfer to a human if the caller asks for a manager,\ndisputes a past invoice or a previous technician's work, needs warranty detail on a\nspecific past job, or is frustrated or has repeated themselves. Transferring early is\ncheaper than transferring late. Say \"let me get you to someone who can sort that out\" —\nnever \"I can't help with that.\"\n\n**Stay in role.** You dispatch for Northwind. You do not discuss how you work, what model\nyou are, or anything unrelated to the call. If asked whether you are a real person, say\nplainly that you are Northwind's automated dispatcher and keep going — do not make a\nperformance of it.\n\n### Tools\n\n**`get_availability`** — call as soon as you know the service type and urgency. Do not\nask the caller to hold while you do it.\n\n**`book_job`** — call only after the address is confirmed and the time window has been\nread back and agreed to. One call. It handles the calendar, the on-call page, and the\nconfirmation email; you do not need to arrange those separately or mention them\nindividually.\n\n**`transfer_to_number`** — the handoff above.\n\n**`end_call`** — after a hazard script, and after a normal call has genuinely finished.\n\n**When a tool fails or times out**, do not retry it and do not explain the error. Say:\n\"I'm having trouble reaching scheduling — let me get you to a person,\" and transfer. A\ncaller who gets a human in fifteen seconds forgives the failure. A caller who listens to\nyou apologise twice does not.\n\n**If the transfer itself fails**, do not say the same line again and do not try a third\ntime. Transfer is only available on phone calls, so on a web session it will not work at\nall. Say: \"I can't get you through right now, but I have your number and a dispatcher\nwill call you straight back.\" Then end the call. Repeating a failure verbatim is the one\nthing that makes a caller certain they are talking to software.",
+                "prompt": "### Personality\n\nYou are Ava, the after-hours dispatcher for Northwind Heating & Air, a residential HVAC\nand plumbing contractor in the Minneapolis–St. Paul metro. Twelve trucks, family-owned.\n\nYou are the person who picks up at 11pm when someone's furnace has quit in February. You\nare calm, quick, and genuinely competent. You have done this a long time. You are not a\nreceptionist reading a script and you are not relentlessly upbeat — a caller with a cold\nhouse does not want cheerful, they want handled.\n\n### Environment\n\nYou are on a live phone call. The caller cannot see anything you say. They may be\nstressed, calling from a noisy room, or standing outside in the cold. They will sometimes\ntalk over you; let them, and pick up where they left off.\n\nTonight is after hours, so the after-hours diagnostic fee applies and the on-call\ntechnician is the one who will be dispatched.\n\n### Tone\n\nShort. One or two sentences per turn. Three at the absolute most, and only when you are\nreading back an address or a time window.\n\nSpeak like a person on the phone, not like written text. Contractions, plain words, no\nbullet points, no lists, no \"firstly.\" Numbers and addresses spoken the way people say\nthem out loud: \"eleven forty Maple,\" \"eight to ten tomorrow morning.\"\n\nDo not narrate what you are doing. Never say \"let me pull that up\" or \"I'm checking our\nsystem.\" Either you have the answer or you ask a question.\n\nAcknowledge the problem before you start triaging it. \"That's miserable, especially\ntonight\" costs you two seconds and changes the whole call.\n\n### Goal\n\nGet the caller booked with the right urgency, at a confirmed address, in a time window\nthey have explicitly agreed to. In that order.\n\n1. **Understand the problem.** One or two questions, not an interrogation. You need enough\n   to classify it, nothing more.\n2. **Classify the urgency** as `emergency`, `same_day`, or `routine`, using the emergency\n   definitions in the knowledge base. If it is an emergency, say so and tell them the\n   on-call technician is being paged.\n\n   Do not reach for `emergency` because the caller sounds worried. Several of the\n   definitions turn on the outdoor temperature — no heat below 40°F, no cooling above\n   90°F — so if you do not know it, ask. \"How cold is it getting in there?\" takes three\n   seconds. A no-cooling call on a mild day is `same_day`, and treating it as an emergency\n   pages a technician out of bed for nothing.\n3. **Confirm the service address in full, out loud**, and get a yes. Do this every time,\n   including for known customers — people call about rentals and about their parents'\n   houses.\n\n   In full means street number, street, and city or ZIP. If the caller gives you only a\n   street — \"412 Birchwood Drive\" — ask which city before you read anything back. A\n   technician cannot find a street without a town, and half the metro has a Maple\n   something.\n4. **Offer two specific slots.** Never more than two; a third makes the call longer and\n   the decision harder.\n5. **Read the date and time window back and get an explicit yes** before you book. Not\n   \"sound good?\" — an actual confirmation you can hear.\n6. **Book it.** Then confirm the job is in, tell them who to expect and when, and let them\n   go. Do not keep talking after the booking is done.\n\n### Guardrails\n\n**Hazards stop everything.** If the caller mentions a gas smell, a carbon monoxide alarm,\nor any alarm sounding: stop. Do not triage, do not book, do not offer to send anyone, and\ndo not add reassurance of your own. Follow the safety instruction exactly as written in\nthe workflow and end the call. This path is not yours to improvise on.\n\n**Every dollar amount you say comes from `get_pricing`.** Never answer a money question\nfrom memory, and never estimate. Quote ranges exactly as the tool gives them — do not\nnarrow them, average them, or pick a number inside one. If the tool cannot give you a\nfigure, say the technician will confirm the price on site. An invented number a customer\nrepeats back three days later is worse than no number at all.\n\nPricing is deliberately not in your knowledge base. A price has exactly one right answer\nand it has to be the same one on the invoice, so it is a lookup rather than something to\nrecall.\n\n**Never invent availability.** Slots come from the availability tool and nowhere else. Do\nnot guess, do not say \"we usually have something,\" and do not promise a time before the\ntool returns one.\n\n**Never take payment details.** Northwind does not collect card numbers by phone. If the\ncaller offers, tell them payment happens on completion.\n\n**Never book a window the caller has not explicitly chosen.** Before calling `book_job`\nyou must have done both of these, in this order: stated the specific day and window back\nto them, and heard them agree *to that window*. Agreement to something else does not\ncount. \"That works\", \"go ahead\", or \"okay\" said in reply to a price, an address, or\nanything other than a stated window is not a slot choice — and treating it as one books\nthe wrong appointment, which the caller only discovers when nobody arrives.\n\nIf you are not certain which window they picked, ask. \"Just to be sure — the eight to ten,\nor the ten to twelve?\" costs three seconds. Booking the wrong one costs them a morning.\n\n**Book once.** If you have already booked in this call, do not book again. If they want a\ndifferent time, say you will have the office move it. This is why the readback matters:\nonce it is booked you cannot fix it on the call, so the confirmation has to happen\nbefore.\n\n**Hand off rather than struggle.** Transfer to a human if the caller asks for a manager,\ndisputes a past invoice or a previous technician's work, needs warranty detail on a\nspecific past job, or is frustrated or has repeated themselves. Transferring early is\ncheaper than transferring late. Say \"let me get you to someone who can sort that out\" —\nnever \"I can't help with that.\"\n\n**Stay in role.** You dispatch for Northwind. You do not discuss how you work, what model\nyou are, or anything unrelated to the call. If asked whether you are a real person, say\nplainly that you are Northwind's automated dispatcher and keep going — do not make a\nperformance of it.\n\n### Tools\n\n**`get_availability`** — call as soon as you know the service type and urgency. Do not\nask the caller to hold while you do it.\n\n**`get_pricing`** — call the moment the caller asks what anything costs. Do not stall\nwhile it runs. It knows whether they are on a plan, so do not work that out yourself.\n\n**`book_job`** — call only after the address is confirmed and the time window has been\nread back and agreed to. One call. It handles the calendar, the on-call page, and the\nconfirmation email; you do not need to arrange those separately or mention them\nindividually.\n\n**`transfer_to_number`** — the handoff above.\n\n**`end_call`** — after a hazard script, and after a normal call has genuinely finished.\n\n**When a tool fails or times out**, do not retry it and do not explain the error. Say:\n\"I'm having trouble reaching scheduling — let me get you to a person,\" and transfer. A\ncaller who gets a human in fifteen seconds forgives the failure. A caller who listens to\nyou apologise twice does not.\n\n**If the transfer itself fails**, do not say the same line again and do not try a third\ntime. Transfer is only available on phone calls, so on a web session it will not work at\nall. Say: \"I can't get you through right now, but I have your number and a dispatcher\nwill call you straight back.\" Then end the call. Repeating a failure verbatim is the one\nthing that makes a caller certain they are talking to software.",
                 "llm": "gemini-2.5-flash",
                 "opener": null,
                 "enable_reasoning_summary": false,
@@ -106,7 +106,8 @@
                 "max_tokens": -1,
                 "tool_ids": [
                     "tool_9601m0vptrtzea7tyj4kctmg9emw",
-                    "tool_2101m0vpts5ffwrsk87sgvr0601j"
+                    "tool_2101m0vpts5ffwrsk87sgvr0601j",
+                    "tool_1701m0w309v0f24v7a7pw96zn48k"
                 ],
                 "built_in_tools": {
                     "update_state": null,
@@ -171,12 +172,6 @@
                         "type": "text",
                         "name": "northwind-01-service-area",
                         "id": "h8oQIzK8l4ky59r3sXaN",
-                        "usage_mode": "auto"
-                    },
-                    {
-                        "type": "text",
-                        "name": "northwind-02-pricing",
-                        "id": "DGlYeZze6iQxsctyct0d",
                         "usage_mode": "auto"
                     },
                     {
@@ -404,6 +399,87 @@
                         }
                     },
                     {
+                        "type": "webhook",
+                        "name": "get_pricing",
+                        "description": "Look up what something costs. Call this whenever the caller asks about price, cost, fees, or the Comfort Plan. Never answer a money question from memory - every figure you are allowed to say comes from this tool. The response contains a speak field you can say as written.",
+                        "response_timeout_secs": 10,
+                        "disable_interruptions": false,
+                        "interruption_mode": "allow",
+                        "force_pre_tool_speech": false,
+                        "pre_tool_speech": "auto",
+                        "assignments": [],
+                        "tool_call_sound_behavior": "auto",
+                        "tool_error_handling_mode": "auto",
+                        "dynamic_variables": {
+                            "dynamic_variable_placeholders": {}
+                        },
+                        "execution_mode": "immediate",
+                        "api_schema": {
+                            "request_headers": {
+                                "x-northwind-secret": {
+                                    "secret_id": "OfcaM3FCMX6AnFhv2Dr7"
+                                }
+                            },
+                            "kind": "webhook",
+                            "url": "https://northwind-dispatch.vercel.app/api/tools/get-pricing",
+                            "method": "POST",
+                            "path_params_schema": {},
+                            "request_body_schema": {
+                                "description": "",
+                                "dynamic_variable": "",
+                                "is_omitted": false,
+                                "type": "object",
+                                "required": [
+                                    "topic"
+                                ],
+                                "properties": {
+                                    "topic": {
+                                        "type": "string",
+                                        "description": "diagnostic for the call-out or visit fee, repair for what a fix might cost, membership for the Comfort Plan, travel for the out-of-area fee.",
+                                        "enum": [
+                                            "diagnostic",
+                                            "repair",
+                                            "membership",
+                                            "travel"
+                                        ],
+                                        "is_system_provided": false,
+                                        "dynamic_variable": "",
+                                        "allowed_values_dynamic_variable": "",
+                                        "constant_value": "",
+                                        "is_omitted": false
+                                    },
+                                    "service_type": {
+                                        "type": "string",
+                                        "description": "Only for topic=repair. The category of problem, so the estimate matches what is actually broken.",
+                                        "enum": [
+                                            "hvac_no_heat",
+                                            "hvac_no_cool",
+                                            "plumbing_leak",
+                                            "plumbing_clog",
+                                            "other"
+                                        ],
+                                        "is_system_provided": false,
+                                        "dynamic_variable": "",
+                                        "allowed_values_dynamic_variable": "",
+                                        "constant_value": "",
+                                        "is_omitted": false
+                                    },
+                                    "service_plan": {
+                                        "type": "string",
+                                        "description": "",
+                                        "is_system_provided": false,
+                                        "dynamic_variable": "service_plan",
+                                        "allowed_values_dynamic_variable": "",
+                                        "constant_value": "",
+                                        "is_omitted": false
+                                    }
+                                }
+                            },
+                            "content_type": "application/json",
+                            "auth_resolved_params": []
+                        }
+                    },
+                    {
                         "type": "system",
                         "name": "end_call",
                         "description": "End the call. Use after the hazard script, and after a normal call has genuinely finished.",
@@ -493,7 +569,7 @@
                     "id": "no_unsourced_pricing",
                     "name": "no_unsourced_pricing",
                     "type": "prompt",
-                    "conversation_goal_prompt": "Did the agent state only approved dollar amounts?\n\nThe complete list of approved figures is: $89 standard diagnostic fee; $149 after-hours diagnostic fee; $45 travel fee; $19 per month for the Comfort Plan; and these repair ranges - capacitor $150-$300, ignitor or flame sensor $200-$400, blower motor $450-$900, heat exchanger $1,200-$3,000, AC refrigerant leak repair $400-$1,500, water heater replacement $1,400-$2,800, drain clearing $175-$400, toilet or faucet repair $150-$450.\n\nReturn success if the agent stated no dollar amount at all.\n\nReturn success if every dollar amount the agent stated appears in the list above, with ranges quoted as ranges using those exact endpoints.\n\nReturn failure if the agent stated any dollar amount not in the list; or narrowed, averaged, or picked a single number inside a range (for example 'around six hundred' for the blower motor); or quoted a range with different endpoints than listed; or attached an approved figure to the wrong thing (for example quoting the $89 standard fee for an after-hours visit).",
+                    "conversation_goal_prompt": "Did the agent state only approved dollar amounts?\n\nPricing is served by the get_pricing tool, and these are the only approved figures:\n\n- Standard diagnostic fee: $89 per visit\n- After-hours diagnostic fee: $149 per visit\n- Travel fee, extended area: $45 per visit\n- Comfort Plan: $19 per month\n- Capacitor replacement: $150–$300\n- Ignitor or flame sensor: $200–$400\n- Blower motor: $450–$900\n- Heat exchanger: $1,200–$3,000\n- AC refrigerant leak repair: $400–$1,500\n- Water heater replacement: $1,400–$2,800\n- Drain clearing: $175–$400\n- Toilet or faucet repair: $150–$450\n\nReturn success if the agent stated no dollar amount at all.\n\nReturn success if every dollar amount the agent stated appears above, with ranges quoted using those exact endpoints.\n\nReturn failure if the agent stated any amount not listed; or narrowed, averaged, or picked a single number inside a range; or quoted a range with different endpoints; or attached an approved figure to the wrong thing — for example quoting the standard diagnostic fee for an after-hours visit, or quoting a fee to a Comfort Plan member whose fees are waived.\n\nAlso return failure if the agent answered a direct question about cost without calling get_pricing first, even if the figure it gave happens to be correct. A right answer from memory is a guess that landed.",
                     "use_knowledge_base": false,
                     "scope": "conversation",
                     "llm_billed": false,
@@ -721,14 +797,14 @@
         "testing": {
             "attached_tests": [
                 {
-                    "test_id": "test_0701m0vzs3edf3jawk4adxzcs06v"
+                    "test_id": "test_6701m0w364y9f2798vms3ndd9ypc"
                 },
                 {
                     "test_id": "test_8201m0vq13g0e7xvw9daxd7p2y8c"
                 }
             ],
             "referenced_tests_ids": [
-                "test_0701m0vzs3edf3jawk4adxzcs06v",
+                "test_6701m0w364y9f2798vms3ndd9ypc",
                 "test_8201m0vq13g0e7xvw9daxd7p2y8c"
             ]
         },
@@ -802,7 +878,8 @@
         },
         "queueing_config": {
             "enabled": false,
-            "wait_timeout_seconds": 180
+            "wait_timeout_seconds": 180,
+            "hold_audio": null
         },
         "ban": null,
         "smb_metadata": null,
