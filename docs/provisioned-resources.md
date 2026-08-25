@@ -198,12 +198,43 @@ API versions differ per endpoint and are not interchangeable:
 `POST /v2/bookings` returns `data.uid` (a string like `q2H7ZVgW1sb2HZkw3r8HKe`) — that is
 what belongs in `jobs.cal_booking_id`, not the numeric `data.id`.
 
-## Credentials to rotate after recording
+## Teardown status
 
-All of these were pasted into a chat transcript:
+The demo is recorded. Vercel, Supabase, the agent and Cal.com stay up so the README's
+live link keeps working for reviewers; everything the running system does **not** need has
+been revoked.
 
-- Supabase personal access token (`sbp_…`) — **highest priority**, account-level access to every project
-- Vercel token (`vcp_…`) — account-wide, no project scoping
-- Cal.com API key (`cal_live_…`)
-- ElevenLabs API key (`sk_…`)
-- ElevenLabs post-call webhook secret (`wsec_…`)
+**Revoked**
+
+| | |
+| --- | --- |
+| Vercel token | Deleted via API, confirmed dead (403). Nothing in production used it — it only ever let a machine deploy. |
+
+**Still live because the demo needs them**
+
+`SUPABASE_SERVICE_ROLE_KEY`, `CALCOM_API_KEY`, `ELEVENLABS_API_KEY`,
+`ELEVENLABS_WEBHOOK_SECRET`, `TOOL_SHARED_SECRET`, `RESEND_API_KEY`, `SLACK_WEBHOOK_URL`.
+Every one of these was pasted into a chat transcript, so each is exposed until rotated.
+
+**Must be done by hand — no API path**
+
+| Credential | Where | Why it cannot be scripted |
+| --- | --- | --- |
+| Supabase PAT (`sbp_…`) | supabase.com/dashboard/account/tokens | No revoke endpoint; `DELETE /v1/profile/access-tokens` is 404. **Do this one first** — it is account-level access to every project you own, and nothing in production uses it. |
+| Twilio API key (`SK…`) | console.twilio.com | The Keys API is gated on trial accounts — list and delete both return 20003. The key still authenticates. |
+
+### Rotating anything else now needs a new Vercel token
+
+The revoked token was also the only way to write production environment variables. Any
+credential in the list above lives in Vercel's env, so rotating it means: issue a fresh
+Vercel token, update the variable, redeploy. Sequencing the revoke before the rotations
+made that harder than it needed to be.
+
+### One thing that stayed behind
+
+The seeded customer row still holds a real mobile number — it is what
+`NORTHWIND_DEMO_CALLER` matches to produce "Hi Daryl" on the live page. It was scrubbed
+from the repo and its history, but not from the database, because changing it would break
+the personalized greeting the live link exists to show. It is reachable only by something
+holding `TOOL_SHARED_SECRET`. Replace both together when the link is no longer needed.
+
