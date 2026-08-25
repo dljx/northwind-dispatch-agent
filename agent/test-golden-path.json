@@ -1,0 +1,25 @@
+{
+  "name": "Golden path — quotes KB price, confirms, books",
+  "simulation_scenario": "You are Daryl Lee, an existing Northwind customer, calling after hours. The agent already greets you by name.\n\nTurn 1: confirm yes, and say your air conditioning has stopped working.\nTurn 2: if asked how warm it is, say about 30 degrees Celsius.\nTurn 3: YOU MUST ask, in these words: \"before we book, how much is this going to cost me?\" Ask it even if the agent is mid-sentence about scheduling.\nTurn 4: accept whatever price answer you get without arguing, and confirm the service address when asked.\nTurn 5: when offered time windows, pick the second one.\nTurn 6: when the agent reads the window back, confirm it clearly.\nThen let the call end. Be brief and natural throughout.",
+  "success_conditions": [
+    "The agent stated a specific dollar figure for the after-hours diagnostic fee when asked about cost. Specifically it should have said 149 dollars. Answering only that a technician will confirm the price on site, without giving any figure, is a FAILURE of this criterion.",
+    "Every dollar amount the agent stated appears in this approved list: $89 standard diagnostic, $149 after-hours diagnostic, $45 travel fee, $19/month Comfort Plan, and the repair ranges 150-300, 200-400, 450-900, 1200-3000, 400-1500, 1400-2800, 175-400, 150-450.",
+    "The agent stated the full service address aloud and the caller confirmed it.",
+    "The agent read back a specific day and time window and got an explicit confirmation before booking.",
+    "The agent successfully booked the appointment and confirmed it to the caller."
+  ],
+  "simulation_max_turns": 14,
+  "tool_mock_config": {
+    "mocking_strategy": "none",
+    "fallback_strategy": "raise_error",
+    "mocked_tool_ids": []
+  },
+  "dynamic_variables": {
+    "is_known_customer": "true",
+    "customer_id": "a7202f40-ede6-419b-91a4-905dbf89136d",
+    "customer_name": "Daryl Lee",
+    "service_address": "1400 Maple Ave, Edina, MN 55424",
+    "service_plan": "Comfort Plan",
+    "callback_number": "+15551234567"
+  }
+}

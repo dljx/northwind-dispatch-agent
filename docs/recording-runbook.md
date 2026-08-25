@@ -162,6 +162,8 @@ of a broken deploy you cannot recover mid-take.
 | "I'm having trouble reaching scheduling" | Read the tool result in the conversation transcript — the failure response now carries an `error` field the agent does not speak. |
 | Transfer fails on the widget | Expected. `transfer_to_number` only works on Twilio/Exotel/SIP calls, so on a web session Ava falls back to promising a callback and ending. Do not stage the escalation beat on the widget. |
 | Ava invents a price | The KB and the eval criterion have drifted apart. |
+| Ava won't quote a price at all | The RAG index was dropped or rebuilt. Check `GET /v1/convai/knowledge-base/{id}/rag-index` — uploading a document does not index it. |
+| Ava books a window nobody chose | The explicit-confirmation guardrail was weakened. She must read the window back and hear agreement *to that window*. |
 
 ---
 

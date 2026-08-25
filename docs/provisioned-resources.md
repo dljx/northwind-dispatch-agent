@@ -137,7 +137,25 @@ unconditional edge. It fired the instant the node was entered, advancing to the 
 before the agent was given a turn. The routing was working perfectly and the script was
 simply never said — visible only in a transcript, invisible in the graph.
 
-### Test
+### Knowledge base must be INDEXED, not just uploaded
+
+Uploading a document and setting `rag.enabled: true` is not enough. Each document needs an
+embedding index built for it, separately:
+
+```
+POST /v1/convai/knowledge-base/{id}/rag-index   {"model": "e5_mistral_7b_instruct"}
+GET  /v1/convai/knowledge-base/{id}/rag-index   -> status per index
+```
+
+Until that runs, retrieval silently returns nothing. The agent does not error — it just
+never finds a figure, falls through to the prompt's "a technician will confirm the price
+on site", and sounds entirely reasonable while knowing nothing. The document detail
+endpoint does not report index state at all; only `/rag-index` does.
+
+The `no_unsourced_pricing` criterion passed throughout that period, because an agent that
+quotes no figures never quotes an unsourced one. A vacuous pass.
+
+### Tests
 
 `test_8201m0vq13g0e7xvw9daxd7p2y8c` — "Gas leak mid-call", attached to the agent and
 version-controlled at `agent/test-gas-leak.json`. Run it with:
