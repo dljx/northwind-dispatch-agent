@@ -1,10 +1,10 @@
 # Demo script
 
-Word for word, with tab cues. Target **4:47** against a hard 5:00 cap.
+Word for word, with tab cues. Target **4:46** against a hard 5:00 cap, taking Option A at the test segment.
 
-Narration is ~148 seconds of it, measured. The two live conversations are the other ~140, and they
+Narration is ~144 seconds of it, measured. The two live conversations are the other ~150, and they
 are the part you do not control — so the narration is written tight on purpose. Read it
-as written and you land around 4:47. Improvise an extra sentence per segment and you are
+as written and you land around 4:46. Improvise an extra sentence per segment and you are
 over the cap with the close cut off.
 
 Two voices in this recording and it matters that they sound different:
@@ -100,6 +100,13 @@ Let that land for a full second before you answer. It is the best moment in the 
 >
 > **CALLER:** "About thirty degrees Celsius."
 >
+> *(she acknowledges, moves toward scheduling)*
+>
+> **CALLER:** "And what's this going to cost me?"
+>
+> *(she quotes the after-hours diagnostic — $149 — from the knowledge base, and does not
+> invent anything around it)*
+>
 > *(she confirms the address)*
 >
 > **CALLER:** "Yep, that's right."
@@ -130,6 +137,12 @@ Quick. Six seconds a tab. You are answering "is any of this actually wired up?"
 > **NARRATION:** "One tool call did all of this. **[TAB 3]** On-call paged in Slack.
 > **[TAB 4]** Customer got a confirmation email. **[TAB 5]** It's on the real calendar.
 > **[TAB 6]** And the row in Postgres — service type, urgency, booking id."
+
+Then, still on the board, point at the scorecard:
+
+> "That price came out of a RAG document — the pricing sheet is in her knowledge base.
+> And 'no unsourced pricing' there is the guard on it: it fails any call where she quotes
+> a figure that isn't in one of those documents."
 
 Then the design point, which is the actual reason to show it:
 
@@ -173,11 +186,29 @@ Then:
 
 ---
 
-## 3:45–4:15 · The test  → **TAB 7**
+## 3:45–4:15 · The test  → **TAB 7**  ·  PICK ONE
 
-**Optional.** The brief does not ask for this. It is the beat that says "not a toy", and
-it is the strongest engineering signal in the video — but if a take is running long, this
-is the segment to lose. See "If it runs long".
+**You cannot keep this in full and also keep the price beat.** Measured: with this segment
+the video is **5:16**, sixteen seconds over the cap. Without it, **4:46**. Choose before
+you record, not during.
+
+**Option A — cut it (recommended).** Lands at 4:46 with fourteen seconds of slack. The
+two-bugs story is in the README, which reviewers read. What you keep instead is the
+knowledge base and the hallucination guard, which is the more distinctive thing: plenty of
+candidates write a test, almost none express a hallucination guard as a pass/fail metric
+tied to a RAG document.
+
+**Option B — compress it to one sentence**, folded into the end of the safety segment
+instead of its own tab. Lands around 4:53, seven seconds of slack. Say only:
+
+> "There's an automated test pinning this path — it's what caught the two bugs that made
+> it work."
+
+**Option C — keep it in full and cut the price beat instead.** Only if you would rather
+show engineering rigour than platform features. I would not: RAG is a core part of the
+product you are demoing to its own team.
+
+The full version follows, for Option C.
 
 **Do not run it live.** A simulation test takes about a minute to settle. Hit run on
 camera and you get a spinner and dead air. Open **TAB 7** on the last completed run — it
@@ -220,9 +251,8 @@ Drop in this order:
 1. **TAB 4, the email** in the proof tour. Slack already makes the same point. (~4s)
 2. **The failing-test screenshot.** Say it instead of showing it. (~3s)
 3. **TAB 5 and 6** in the architecture tour — two tabs, not four. (~6s)
-4. **The whole test segment.** It is optional and it is ~30s — the single biggest saving
-   available. Losing it costs you the strongest engineering beat, so take it last, but it
-   is there if a take overruns badly.
+4. **The whole test segment**, if you had not already taken Option A. ~30s, the single
+   biggest saving available.
 5. **The second half of the fan-out explanation** — "Wait on all three and the caller sits
    in silence." Keep the first half; the point survives. (~7s)
 
