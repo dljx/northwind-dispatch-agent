@@ -86,7 +86,14 @@
             "language": "en",
             "hinglish_mode": false,
             "dynamic_variables": {
-                "dynamic_variable_placeholders": {}
+                "dynamic_variable_placeholders": {
+                    "is_known_customer": "false",
+                    "customer_id": "",
+                    "customer_name": "",
+                    "service_address": "",
+                    "service_plan": "",
+                    "callback_number": ""
+                }
             },
             "disable_first_message_interruptions": false,
             "max_conversation_duration_message": "",

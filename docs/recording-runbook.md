@@ -12,6 +12,16 @@ chirpy, try Bella (`hpp4J3VqNfWAUOO0d1Us`); if flat, raise stability to 0.5. Thi
 one decision nobody could make for you, and it is the first thing a voice company
 notices.
 
+**The dashboard Test button is for the voice only — never for the demo.** It supplies no
+dynamic variables and no `first_message` override, because both normally come from the
+webhook or the widget page. So Test always gives you the *generic* greeting, and it used
+to fail outright with `Missing required dynamic variables in tools`. Placeholders now
+absorb that, but the greeting is still generic there and always will be.
+
+Judge the voice in Test. Judge everything else at
+`https://northwind-dispatch.vercel.app` — that is the only surface that resolves a real
+caller and produces "Hi Daryl".
+
 **Lay out the screen.** One browser window, two tabs side by side or a split:
 
 ```
@@ -136,7 +146,8 @@ of a broken deploy you cannot recover mid-take.
 
 | Symptom | Cause |
 | --- | --- |
-| Generic greeting instead of "Hi Daryl" | One of the three override gates flipped off. See `provisioned-resources.md`. |
+| Generic greeting instead of "Hi Daryl" | Testing from the dashboard rather than the widget page — expected there. On the page, one of the three override gates has flipped off; see `provisioned-resources.md`. |
+| `Missing required dynamic variables in tools` | The session started without dynamic variables. Placeholders cover this now; if it returns, they were cleared from the agent config. |
 | Board never updates | Post-call webhook not firing — see take zero. |
 | Ava offers a 1am appointment | Cal.com schedule reverted to the account default (Asia/Singapore). Should be schedule `2279724`. |
 | Tools return 401 | Workspace secret `NORTHWIND_TOOL_SECRET` deleted or rotated. |
