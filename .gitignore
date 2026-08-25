@@ -14,3 +14,7 @@ next-env.d.ts
 .vercel
 .env*
 convai.lock
+
+# scratch files from build scripts
+_*.json
+_*.txt
