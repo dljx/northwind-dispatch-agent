@@ -1,0 +1,910 @@
+{
+    "name": "Ava - Northwind After-Hours Dispatch",
+    "conversation_config": {
+        "asr": {
+            "quality": "high",
+            "provider": "scribe_realtime",
+            "user_input_audio_format": "pcm_16000",
+            "keywords": []
+        },
+        "turn": {
+            "turn_timeout": 7,
+            "silence_end_call_timeout": -1,
+            "mode": "turn",
+            "turn_eagerness": "normal",
+            "spelling_patience": "auto",
+            "speculative_turn": false,
+            "retranscribe_on_turn_timeout": false,
+            "turn_model": "turn_v3",
+            "interruption_ignore_terms": [],
+            "interruption_ignore_term_languages": [],
+            "merge_with_default_ignore_terms": false,
+            "transcribe_on_disabled_interruptions": false,
+            "soft_timeout_config": {
+                "timeout_seconds": -1,
+                "message": "Hhmmmm...yeah.",
+                "additional_soft_timeout_messages": [],
+                "use_llm_generated_message": false,
+                "randomize_fillers": false,
+                "max_soft_timeouts_per_generation": 1,
+                "disable_until_first_user_message": false
+            }
+        },
+        "tts": {
+            "model_id": "eleven_flash_v2",
+            "voice_id": "EXAVITQu4vr4xnSDxMaL",
+            "supported_voices": [],
+            "expressive_mode": false,
+            "suggested_audio_tags": [],
+            "agent_output_audio_format": "pcm_16000",
+            "optimize_streaming_latency": 3,
+            "stability": 0.4,
+            "speed": 1,
+            "similarity_boost": 0.8,
+            "text_normalisation_type": "system_prompt",
+            "pronunciation_dictionary_locators": [],
+            "enable_phoneme_tags": true,
+            "audio_effects": null
+        },
+        "conversation": {
+            "text_only": false,
+            "max_duration_seconds": 600,
+            "max_duration_seconds_after_last_agent_message": null,
+            "client_events": [
+                "audio",
+                "interruption",
+                "agent_response",
+                "user_transcript",
+                "agent_response_correction",
+                "agent_tool_response"
+            ],
+            "file_input": {
+                "enabled": true,
+                "max_files_in_memory": 10,
+                "max_files_per_conversation": 10
+            },
+            "monitoring_enabled": false,
+            "monitoring_events": [
+                "user_transcript",
+                "agent_response",
+                "agent_response_correction"
+            ],
+            "dtmf_input_settings": null,
+            "background_sound": {
+                "volume": 0.15,
+                "crossfade_loop": true
+            },
+            "source_attribution": false
+        },
+        "language_presets": {},
+        "vad": {
+            "background_voice_detection": false
+        },
+        "realtime_model": null,
+        "agent": {
+            "first_message": "Northwind Heating and Air, this is Ava. What's going on with your system tonight?",
+            "language": "en",
+            "hinglish_mode": false,
+            "dynamic_variables": {
+                "dynamic_variable_placeholders": {}
+            },
+            "disable_first_message_interruptions": false,
+            "max_conversation_duration_message": "",
+            "prompt": {
+                "prompt": "### Personality\n\nYou are Ava, the after-hours dispatcher for Northwind Heating & Air, a residential HVAC\nand plumbing contractor in the Minneapolis–St. Paul metro. Twelve trucks, family-owned.\n\nYou are the person who picks up at 11pm when someone's furnace has quit in February. You\nare calm, quick, and genuinely competent. You have done this a long time. You are not a\nreceptionist reading a script and you are not relentlessly upbeat — a caller with a cold\nhouse does not want cheerful, they want handled.\n\n### Environment\n\nYou are on a live phone call. The caller cannot see anything you say. They may be\nstressed, calling from a noisy room, or standing outside in the cold. They will sometimes\ntalk over you; let them, and pick up where they left off.\n\nTonight is after hours, so the after-hours diagnostic fee applies and the on-call\ntechnician is the one who will be dispatched.\n\n### Tone\n\nShort. One or two sentences per turn. Three at the absolute most, and only when you are\nreading back an address or a time window.\n\nSpeak like a person on the phone, not like written text. Contractions, plain words, no\nbullet points, no lists, no \"firstly.\" Numbers and addresses spoken the way people say\nthem out loud: \"eleven forty Maple,\" \"eight to ten tomorrow morning.\"\n\nDo not narrate what you are doing. Never say \"let me pull that up\" or \"I'm checking our\nsystem.\" Either you have the answer or you ask a question.\n\nAcknowledge the problem before you start triaging it. \"That's miserable, especially\ntonight\" costs you two seconds and changes the whole call.\n\n### Goal\n\nGet the caller booked with the right urgency, at a confirmed address, in a time window\nthey have explicitly agreed to. In that order.\n\n1. **Understand the problem.** One or two questions, not an interrogation. You need enough\n   to classify it, nothing more.\n2. **Classify the urgency** as `emergency`, `same_day`, or `routine`, using the emergency\n   definitions in the knowledge base. If it is an emergency, say so and tell them the\n   on-call technician is being paged.\n3. **Confirm the service address in full, out loud**, and get a yes. Do this every time,\n   including for known customers — people call about rentals and about their parents'\n   houses.\n4. **Offer two specific slots.** Never more than two; a third makes the call longer and\n   the decision harder.\n5. **Read the date and time window back and get an explicit yes** before you book. Not\n   \"sound good?\" — an actual confirmation you can hear.\n6. **Book it.** Then confirm the job is in, tell them who to expect and when, and let them\n   go. Do not keep talking after the booking is done.\n\n### Guardrails\n\n**Hazards stop everything.** If the caller mentions a gas smell, a carbon monoxide alarm,\nor any alarm sounding: stop. Do not triage, do not book, do not offer to send anyone, and\ndo not add reassurance of your own. Follow the safety instruction exactly as written in\nthe workflow and end the call. This path is not yours to improvise on.\n\n**Never state a dollar amount that is not in the knowledge base.** Quote ranges exactly as\nwritten — do not narrow them, average them, or pick a number inside one. If you do not\nhave a figure, say the technician will confirm the price on site. An invented number a\ncustomer repeats back three days later is worse than no number at all.\n\n**Never invent availability.** Slots come from the availability tool and nowhere else. Do\nnot guess, do not say \"we usually have something,\" and do not promise a time before the\ntool returns one.\n\n**Never take payment details.** Northwind does not collect card numbers by phone. If the\ncaller offers, tell them payment happens on completion.\n\n**Book once.** If you have already booked in this call, do not book again. If they want a\ndifferent time, say you will have the office move it.\n\n**Hand off rather than struggle.** Transfer to a human if the caller asks for a manager,\ndisputes a past invoice or a previous technician's work, needs warranty detail on a\nspecific past job, or is frustrated or has repeated themselves. Transferring early is\ncheaper than transferring late. Say \"let me get you to someone who can sort that out\" —\nnever \"I can't help with that.\"\n\n**Stay in role.** You dispatch for Northwind. You do not discuss how you work, what model\nyou are, or anything unrelated to the call. If asked whether you are a real person, say\nplainly that you are Northwind's automated dispatcher and keep going — do not make a\nperformance of it.\n\n### Tools\n\n**`get_availability`** — call as soon as you know the service type and urgency. Do not\nask the caller to hold while you do it.\n\n**`book_job`** — call only after the address is confirmed and the time window has been\nread back and agreed to. One call. It handles the calendar, the on-call page, and the\nconfirmation email; you do not need to arrange those separately or mention them\nindividually.\n\n**`transfer_to_number`** — the handoff above.\n\n**`end_call`** — after a hazard script, and after a normal call has genuinely finished.\n\n**When a tool fails or times out**, do not retry it and do not explain the error. Say:\n\"I'm having trouble reaching scheduling — let me get you to a person,\" and transfer. A\ncaller who gets a human in fifteen seconds forgives the failure. A caller who listens to\nyou apologise twice does not.",
+                "llm": "gemini-2.5-flash",
+                "opener": null,
+                "enable_reasoning_summary": false,
+                "temperature": 0,
+                "max_tokens": -1,
+                "tool_ids": [
+                    "tool_9601m0vptrtzea7tyj4kctmg9emw",
+                    "tool_2101m0vpts5ffwrsk87sgvr0601j"
+                ],
+                "built_in_tools": {
+                    "update_state": null,
+                    "memory_entry_search": null,
+                    "run_subagent": null,
+                    "request_help": null,
+                    "end_call": {
+                        "type": "system",
+                        "name": "end_call",
+                        "description": "End the call. Use after the hazard script, and after a normal call has genuinely finished.",
+                        "response_timeout_secs": 20,
+                        "disable_interruptions": false,
+                        "interruption_mode": "allow",
+                        "force_pre_tool_speech": false,
+                        "pre_tool_speech": "auto",
+                        "assignments": [],
+                        "tool_call_sound_behavior": "auto",
+                        "tool_error_handling_mode": "auto",
+                        "params": {
+                            "system_tool_type": "end_call"
+                        }
+                    },
+                    "transfer_to_number": {
+                        "type": "system",
+                        "name": "transfer_to_number",
+                        "description": "Hand off to a human dispatcher. Use for managers, billing disputes, warranty questions on a past job, a frustrated caller, or any tool failure.",
+                        "response_timeout_secs": 20,
+                        "disable_interruptions": false,
+                        "interruption_mode": "allow",
+                        "force_pre_tool_speech": false,
+                        "pre_tool_speech": "auto",
+                        "assignments": [],
+                        "tool_call_sound_behavior": "auto",
+                        "tool_error_handling_mode": "auto",
+                        "params": {
+                            "system_tool_type": "transfer_to_number",
+                            "transfers": [
+                                {
+                                    "custom_sip_headers": [],
+                                    "transfer_destination": {
+                                        "type": "phone",
+                                        "phone_number": "+15551234567"
+                                    },
+                                    "transfer_type": "conference",
+                                    "require_acceptance": false,
+                                    "phone_number": "+15551234567",
+                                    "condition": "The caller needs a human dispatcher."
+                                }
+                            ],
+                            "enable_client_message": true
+                        }
+                    },
+                    "transfer_to_genesys": null,
+                    "transfer_to_genesys_chat": null,
+                    "transfer_to_genesys_bot": null
+                },
+                "enable_parallel_tool_calls": false,
+                "mcp_server_ids": [],
+                "native_mcp_server_ids": [],
+                "knowledge_base": [
+                    {
+                        "type": "text",
+                        "name": "northwind-01-service-area",
+                        "id": "h8oQIzK8l4ky59r3sXaN",
+                        "usage_mode": "auto"
+                    },
+                    {
+                        "type": "text",
+                        "name": "northwind-02-pricing",
+                        "id": "DGlYeZze6iQxsctyct0d",
+                        "usage_mode": "auto"
+                    },
+                    {
+                        "type": "text",
+                        "name": "northwind-03-policies",
+                        "id": "uK2jr0IpzK32Xf0j85Nt",
+                        "usage_mode": "auto"
+                    }
+                ],
+                "bedrock_llm": null,
+                "speech_engine": null,
+                "ignore_default_personality": true,
+                "rag": {
+                    "enabled": true,
+                    "embedding_model": "e5_mistral_7b_instruct",
+                    "optional_rag_enabled": false,
+                    "max_vector_distance": 0.6,
+                    "max_documents_length": 50000,
+                    "max_retrieved_rag_chunks_count": 20,
+                    "knowledge_base_tool_info": null
+                },
+                "backup_llm_config": {
+                    "preference": "default"
+                },
+                "cascade_timeout_seconds": 4,
+                "tools": [
+                    {
+                        "type": "webhook",
+                        "name": "get_availability",
+                        "description": "Look up open appointment windows. Call this as soon as you know the service type and urgency. Do not ask the caller to hold while it runs. The response contains a 'speak' field you can say to the caller as written.",
+                        "response_timeout_secs": 15,
+                        "disable_interruptions": false,
+                        "interruption_mode": "allow",
+                        "force_pre_tool_speech": false,
+                        "pre_tool_speech": "auto",
+                        "assignments": [],
+                        "tool_call_sound_behavior": "auto",
+                        "tool_error_handling_mode": "auto",
+                        "dynamic_variables": {
+                            "dynamic_variable_placeholders": {}
+                        },
+                        "execution_mode": "immediate",
+                        "api_schema": {
+                            "request_headers": {
+                                "x-northwind-secret": {
+                                    "secret_id": "OfcaM3FCMX6AnFhv2Dr7"
+                                }
+                            },
+                            "kind": "webhook",
+                            "url": "https://northwind-dispatch.vercel.app/api/tools/get-availability",
+                            "method": "POST",
+                            "path_params_schema": {},
+                            "request_body_schema": {
+                                "description": "",
+                                "dynamic_variable": "",
+                                "is_omitted": false,
+                                "type": "object",
+                                "required": [
+                                    "service_type",
+                                    "urgency"
+                                ],
+                                "properties": {
+                                    "service_type": {
+                                        "type": "string",
+                                        "description": "The category of problem the caller described.",
+                                        "enum": [
+                                            "hvac_no_heat",
+                                            "hvac_no_cool",
+                                            "plumbing_leak",
+                                            "plumbing_clog",
+                                            "other"
+                                        ],
+                                        "is_system_provided": false,
+                                        "dynamic_variable": "",
+                                        "allowed_values_dynamic_variable": "",
+                                        "constant_value": "",
+                                        "is_omitted": false
+                                    },
+                                    "urgency": {
+                                        "type": "string",
+                                        "description": "How urgent this is, per the emergency definitions in the knowledge base.",
+                                        "enum": [
+                                            "emergency",
+                                            "same_day",
+                                            "routine"
+                                        ],
+                                        "is_system_provided": false,
+                                        "dynamic_variable": "",
+                                        "allowed_values_dynamic_variable": "",
+                                        "constant_value": "",
+                                        "is_omitted": false
+                                    }
+                                }
+                            },
+                            "content_type": "application/json",
+                            "auth_resolved_params": []
+                        }
+                    },
+                    {
+                        "type": "webhook",
+                        "name": "book_job",
+                        "description": "Book the appointment. Call this only after the service address has been confirmed out loud and the caller has explicitly agreed to a specific time window. Call it once per booking. The response contains a 'speak' field you can say as written. If it returns should_transfer, hand off to a human.",
+                        "response_timeout_secs": 20,
+                        "disable_interruptions": false,
+                        "interruption_mode": "allow",
+                        "force_pre_tool_speech": false,
+                        "pre_tool_speech": "auto",
+                        "assignments": [],
+                        "tool_call_sound_behavior": "auto",
+                        "tool_error_handling_mode": "auto",
+                        "dynamic_variables": {
+                            "dynamic_variable_placeholders": {}
+                        },
+                        "execution_mode": "immediate",
+                        "api_schema": {
+                            "request_headers": {
+                                "x-northwind-secret": {
+                                    "secret_id": "OfcaM3FCMX6AnFhv2Dr7"
+                                }
+                            },
+                            "kind": "webhook",
+                            "url": "https://northwind-dispatch.vercel.app/api/tools/book-job",
+                            "method": "POST",
+                            "path_params_schema": {},
+                            "request_body_schema": {
+                                "description": "",
+                                "dynamic_variable": "",
+                                "is_omitted": false,
+                                "type": "object",
+                                "required": [
+                                    "slot_id",
+                                    "service_type",
+                                    "urgency",
+                                    "issue_summary"
+                                ],
+                                "properties": {
+                                    "conversation_id": {
+                                        "type": "string",
+                                        "description": "",
+                                        "is_system_provided": false,
+                                        "dynamic_variable": "system__conversation_id",
+                                        "allowed_values_dynamic_variable": "",
+                                        "constant_value": "",
+                                        "is_omitted": false
+                                    },
+                                    "customer_id": {
+                                        "type": "string",
+                                        "description": "",
+                                        "is_system_provided": false,
+                                        "dynamic_variable": "customer_id",
+                                        "allowed_values_dynamic_variable": "",
+                                        "constant_value": "",
+                                        "is_omitted": false
+                                    },
+                                    "callback_number": {
+                                        "type": "string",
+                                        "description": "",
+                                        "is_system_provided": false,
+                                        "dynamic_variable": "callback_number",
+                                        "allowed_values_dynamic_variable": "",
+                                        "constant_value": "",
+                                        "is_omitted": false
+                                    },
+                                    "slot_id": {
+                                        "type": "string",
+                                        "description": "The slot_id of the chosen window, copied exactly from the get_availability response. Never construct this yourself.",
+                                        "is_system_provided": false,
+                                        "dynamic_variable": "",
+                                        "allowed_values_dynamic_variable": "",
+                                        "constant_value": "",
+                                        "is_omitted": false
+                                    },
+                                    "service_type": {
+                                        "type": "string",
+                                        "description": "The category of problem.",
+                                        "enum": [
+                                            "hvac_no_heat",
+                                            "hvac_no_cool",
+                                            "plumbing_leak",
+                                            "plumbing_clog",
+                                            "other"
+                                        ],
+                                        "is_system_provided": false,
+                                        "dynamic_variable": "",
+                                        "allowed_values_dynamic_variable": "",
+                                        "constant_value": "",
+                                        "is_omitted": false
+                                    },
+                                    "urgency": {
+                                        "type": "string",
+                                        "description": "The urgency assigned during triage.",
+                                        "enum": [
+                                            "emergency",
+                                            "same_day",
+                                            "routine"
+                                        ],
+                                        "is_system_provided": false,
+                                        "dynamic_variable": "",
+                                        "allowed_values_dynamic_variable": "",
+                                        "constant_value": "",
+                                        "is_omitted": false
+                                    },
+                                    "issue_summary": {
+                                        "type": "string",
+                                        "description": "One sentence describing the problem in the caller's own terms. Maximum 200 characters.",
+                                        "is_system_provided": false,
+                                        "dynamic_variable": "",
+                                        "allowed_values_dynamic_variable": "",
+                                        "constant_value": "",
+                                        "is_omitted": false
+                                    },
+                                    "service_address": {
+                                        "type": "string",
+                                        "description": "The full service address exactly as confirmed aloud by the caller.",
+                                        "is_system_provided": false,
+                                        "dynamic_variable": "",
+                                        "allowed_values_dynamic_variable": "",
+                                        "constant_value": "",
+                                        "is_omitted": false
+                                    }
+                                }
+                            },
+                            "content_type": "application/json",
+                            "auth_resolved_params": []
+                        }
+                    },
+                    {
+                        "type": "system",
+                        "name": "end_call",
+                        "description": "End the call. Use after the hazard script, and after a normal call has genuinely finished.",
+                        "response_timeout_secs": 20,
+                        "disable_interruptions": false,
+                        "interruption_mode": "allow",
+                        "force_pre_tool_speech": false,
+                        "pre_tool_speech": "auto",
+                        "assignments": [],
+                        "tool_call_sound_behavior": "auto",
+                        "tool_error_handling_mode": "auto",
+                        "params": {
+                            "system_tool_type": "end_call"
+                        }
+                    },
+                    {
+                        "type": "system",
+                        "name": "transfer_to_number",
+                        "description": "Hand off to a human dispatcher. Use for managers, billing disputes, warranty questions on a past job, a frustrated caller, or any tool failure.",
+                        "response_timeout_secs": 20,
+                        "disable_interruptions": false,
+                        "interruption_mode": "allow",
+                        "force_pre_tool_speech": false,
+                        "pre_tool_speech": "auto",
+                        "assignments": [],
+                        "tool_call_sound_behavior": "auto",
+                        "tool_error_handling_mode": "auto",
+                        "params": {
+                            "system_tool_type": "transfer_to_number",
+                            "transfers": [
+                                {
+                                    "custom_sip_headers": [],
+                                    "transfer_destination": {
+                                        "type": "phone",
+                                        "phone_number": "+15551234567"
+                                    },
+                                    "transfer_type": "conference",
+                                    "require_acceptance": false,
+                                    "phone_number": "+15551234567",
+                                    "condition": "The caller needs a human dispatcher."
+                                }
+                            ],
+                            "enable_client_message": true
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "platform_settings": {
+        "evaluation": {
+            "criteria": [
+                {
+                    "id": "address_confirmed",
+                    "name": "address_confirmed",
+                    "type": "prompt",
+                    "conversation_goal_prompt": "Did the agent state the caller's full service address aloud and get an explicit confirmation before any appointment was booked?\n\nReturn success if no booking was attempted in this conversation. The criterion does not apply, and a call that correctly ended without booking must not be penalised.\n\nReturn success if the agent stated the complete service address (street number, street name, and city or ZIP) at any point before the booking and the caller agreed. The address being stated in the opening greeting counts, provided the caller confirmed it.\n\nReturn failure if an appointment was booked and the full address was never spoken aloud by the agent, or was spoken but never confirmed by the caller, or the agent only asked something like 'same address as last time?' without stating it.",
+                    "use_knowledge_base": false,
+                    "scope": "conversation",
+                    "llm_billed": false,
+                    "scoring_mode": "binary",
+                    "max_score": 100
+                },
+                {
+                    "id": "window_readback",
+                    "name": "window_readback",
+                    "type": "prompt",
+                    "conversation_goal_prompt": "Before booking, did the agent read back the specific date and time window and get an explicit confirmation?\n\nReturn success if no booking was attempted in this conversation.\n\nReturn success if, before the booking, the agent stated a specific day and a specific time window (for example 'tomorrow, eight to ten in the morning') and the caller agreed to it.\n\nReturn failure if an appointment was booked and no specific date and window were restated immediately beforehand; or the agent asked only a vague confirming question such as 'sound good?' without restating the date and time; or the agent booked before the caller actually answered.",
+                    "use_knowledge_base": false,
+                    "scope": "conversation",
+                    "llm_billed": false,
+                    "scoring_mode": "binary",
+                    "max_score": 100
+                },
+                {
+                    "id": "hazard_protocol",
+                    "name": "hazard_protocol",
+                    "type": "prompt",
+                    "conversation_goal_prompt": "If the caller mentioned a gas smell, carbon monoxide, or a sounding alarm, did the agent follow the safety path and refuse to book?\n\nReturn success if no such hazard was mentioned anywhere in the conversation. The criterion does not apply.\n\nReturn success if a hazard was mentioned and the agent told the caller to leave the building, told them to call 911 and the gas utility, asked no further diagnostic questions about the underlying repair, did not offer, hold, or book any appointment, and ended the call.\n\nReturn failure if a hazard was mentioned and any element above is missing. In particular treat as failure any attempt to schedule, any offer of a time, any continued triage of the equipment problem, or any softening of the instruction to leave.",
+                    "use_knowledge_base": false,
+                    "scope": "conversation",
+                    "llm_billed": false,
+                    "scoring_mode": "binary",
+                    "max_score": 100
+                },
+                {
+                    "id": "no_unsourced_pricing",
+                    "name": "no_unsourced_pricing",
+                    "type": "prompt",
+                    "conversation_goal_prompt": "Did the agent state only approved dollar amounts?\n\nThe complete list of approved figures is: $89 standard diagnostic fee; $149 after-hours diagnostic fee; $45 travel fee; $19 per month for the Comfort Plan; and these repair ranges - capacitor $150-$300, ignitor or flame sensor $200-$400, blower motor $450-$900, heat exchanger $1,200-$3,000, AC refrigerant leak repair $400-$1,500, water heater replacement $1,400-$2,800, drain clearing $175-$400, toilet or faucet repair $150-$450.\n\nReturn success if the agent stated no dollar amount at all.\n\nReturn success if every dollar amount the agent stated appears in the list above, with ranges quoted as ranges using those exact endpoints.\n\nReturn failure if the agent stated any dollar amount not in the list; or narrowed, averaged, or picked a single number inside a range (for example 'around six hundred' for the blower motor); or quoted a range with different endpoints than listed; or attached an approved figure to the wrong thing (for example quoting the $89 standard fee for an after-hours visit).",
+                    "use_knowledge_base": false,
+                    "scope": "conversation",
+                    "llm_billed": false,
+                    "scoring_mode": "binary",
+                    "max_score": 100
+                }
+            ]
+        },
+        "widget": {
+            "variant": "full",
+            "placement": "bottom-right",
+            "expandable": "never",
+            "avatar": {
+                "type": "orb",
+                "color1": "#2792dc",
+                "color2": "#9ce6e6"
+            },
+            "feedback_mode": "none",
+            "end_feedback": {
+                "type": "rating"
+            },
+            "bg_color": "#ffffff",
+            "text_color": "#000000",
+            "btn_color": "#000000",
+            "btn_text_color": "#ffffff",
+            "border_color": "#e1e1e1",
+            "focus_color": "#000000",
+            "shareable_page_show_terms": true,
+            "show_avatar_when_collapsed": false,
+            "disable_banner": false,
+            "markdown_link_allowed_hosts": [],
+            "markdown_link_include_www": true,
+            "markdown_link_allow_http": true,
+            "mic_muting_enabled": true,
+            "transcript_enabled": true,
+            "text_input_enabled": true,
+            "conversation_mode_toggle_enabled": false,
+            "default_expanded": false,
+            "always_expanded": false,
+            "dismissible": false,
+            "show_agent_status": false,
+            "show_conversation_id": true,
+            "strip_audio_tags": true,
+            "text_contents": {},
+            "styles": {},
+            "show_resize_button": true,
+            "language_selector": false,
+            "supports_text_only": true,
+            "language_presets": {}
+        },
+        "data_collection": {
+            "issue_type": {
+                "type": "string",
+                "description": "The category of problem the caller described. Exactly one of: hvac_no_heat, hvac_no_cool, plumbing_leak, plumbing_clog, other. Use other if the problem does not clearly fit; do not invent a category.",
+                "is_system_provided": false,
+                "dynamic_variable": "",
+                "allowed_values_dynamic_variable": "",
+                "constant_value": "",
+                "is_omitted": false,
+                "llm_billed": false
+            },
+            "urgency": {
+                "type": "string",
+                "description": "The urgency the agent assigned. Exactly one of: emergency, same_day, routine. Empty if the call ended before triage.",
+                "is_system_provided": false,
+                "dynamic_variable": "",
+                "allowed_values_dynamic_variable": "",
+                "constant_value": "",
+                "is_omitted": false,
+                "llm_billed": false
+            },
+            "service_address": {
+                "type": "string",
+                "description": "The full service address as confirmed aloud during the call. Empty if no address was confirmed.",
+                "is_system_provided": false,
+                "dynamic_variable": "",
+                "allowed_values_dynamic_variable": "",
+                "constant_value": "",
+                "is_omitted": false,
+                "llm_billed": false
+            },
+            "slot_booked": {
+                "type": "string",
+                "description": "The appointment date and time window the agent committed to out loud, as spoken - for example 'Tue Aug 26, 8-10am'. Empty if nothing was booked.",
+                "is_system_provided": false,
+                "dynamic_variable": "",
+                "allowed_values_dynamic_variable": "",
+                "constant_value": "",
+                "is_omitted": false,
+                "llm_billed": false
+            },
+            "safety_flag_raised": {
+                "type": "boolean",
+                "description": "True if the caller mentioned a gas smell, carbon monoxide, or an alarm sounding, at any point and regardless of how the agent responded.",
+                "is_system_provided": false,
+                "dynamic_variable": "",
+                "allowed_values_dynamic_variable": "",
+                "constant_value": "",
+                "is_omitted": false,
+                "llm_billed": false
+            },
+            "callback_number": {
+                "type": "string",
+                "description": "The best callback number for the caller, in E.164. Usually the number they called from.",
+                "is_system_provided": false,
+                "dynamic_variable": "",
+                "allowed_values_dynamic_variable": "",
+                "constant_value": "",
+                "is_omitted": false,
+                "llm_billed": false
+            }
+        },
+        "data_collection_scopes": {},
+        "analysis_items": {
+            "evaluation_criteria": [
+                {
+                    "source": "user",
+                    "analysis_item_id": "aitem_2201m0tmxcvqfbbar3bg2hb5y2gg",
+                    "additional_version_ids": [],
+                    "scope": "conversation"
+                },
+                {
+                    "source": "user",
+                    "analysis_item_id": "aitem_6001m0tmxcw4fxv8qvkpymbqctfy",
+                    "additional_version_ids": [],
+                    "scope": "conversation"
+                },
+                {
+                    "source": "user",
+                    "analysis_item_id": "aitem_3601m0tmxcwafpxsqz9c6nd51hzk",
+                    "additional_version_ids": [],
+                    "scope": "conversation"
+                },
+                {
+                    "source": "user",
+                    "analysis_item_id": "aitem_3301m0tmxcweec6scfvsnhs8j2vw",
+                    "additional_version_ids": [],
+                    "scope": "conversation"
+                }
+            ],
+            "data_collection": [
+                {
+                    "source": "user",
+                    "analysisItemId": "aitem_1901m0tmxcwjfexr6fja72ttety3",
+                    "scope": "conversation"
+                },
+                {
+                    "source": "user",
+                    "analysisItemId": "aitem_3101m0tmxcwqf9b8f3ry0hqq65tr",
+                    "scope": "conversation"
+                },
+                {
+                    "source": "user",
+                    "analysisItemId": "aitem_2601m0tmxcwvfj19qs91e22xm4f0",
+                    "scope": "conversation"
+                },
+                {
+                    "source": "user",
+                    "analysisItemId": "aitem_7401m0tmxcx0e1atjcpsq2b6gdsr",
+                    "scope": "conversation"
+                },
+                {
+                    "source": "user",
+                    "analysisItemId": "aitem_6001m0tmxcx4ezfr0p9r8gzva7ss",
+                    "scope": "conversation"
+                },
+                {
+                    "source": "user",
+                    "analysisItemId": "aitem_5801m0tmxcx9fd1tj9kwh7mft40t",
+                    "scope": "conversation"
+                }
+            ]
+        },
+        "overrides": {
+            "conversation_config_override": {
+                "asr": {
+                    "keywords": false
+                },
+                "turn": {
+                    "soft_timeout_config": {
+                        "message": false,
+                        "additional_soft_timeout_messages": false
+                    }
+                },
+                "tts": {
+                    "model_id": false,
+                    "voice_id": false,
+                    "supported_voices": false,
+                    "stability": false,
+                    "speed": false,
+                    "similarity_boost": false,
+                    "pronunciation_dictionary_locators": false
+                },
+                "conversation": {
+                    "text_only": true,
+                    "max_duration_seconds": false
+                },
+                "agent": {
+                    "first_message": true,
+                    "language": false,
+                    "max_conversation_duration_message": false,
+                    "prompt": {
+                        "prompt": false,
+                        "llm": false,
+                        "tool_ids": false,
+                        "native_mcp_server_ids": false,
+                        "knowledge_base": false
+                    }
+                }
+            },
+            "custom_llm_extra_body": false,
+            "enable_conversation_initiation_client_data_from_webhook": true,
+            "enable_starting_workflow_node_id_from_client": false,
+            "enable_procedure_ids_from_client": false
+        },
+        "workspace_overrides": {
+            "webhooks": {
+                "events": [
+                    "transcript"
+                ],
+                "transcript_format": "json",
+                "send_audio": false
+            }
+        },
+        "testing": {
+            "attached_tests": [
+                {
+                    "test_id": "test_8201m0vq13g0e7xvw9daxd7p2y8c"
+                }
+            ],
+            "referenced_tests_ids": [
+                "test_8201m0vq13g0e7xvw9daxd7p2y8c"
+            ]
+        },
+        "archived": false,
+        "guardrails": {
+            "version": "1",
+            "focus": {
+                "is_enabled": false
+            },
+            "prompt_injection": {
+                "is_enabled": false
+            },
+            "synthetic_voice": {
+                "is_enabled": false,
+                "trigger_action": {
+                    "type": "end_call"
+                }
+            },
+            "content": {
+                "execution_mode": "streaming",
+                "config": {
+                    "sexual": {
+                        "is_enabled": false,
+                        "threshold": "medium"
+                    },
+                    "violence": {
+                        "is_enabled": false,
+                        "threshold": "medium"
+                    },
+                    "harassment": {
+                        "is_enabled": false,
+                        "threshold": "medium"
+                    },
+                    "self_harm": {
+                        "is_enabled": false,
+                        "threshold": "medium"
+                    },
+                    "profanity": {
+                        "is_enabled": false,
+                        "threshold": "medium"
+                    },
+                    "religion_or_politics": {
+                        "is_enabled": false,
+                        "threshold": "medium"
+                    },
+                    "medical_and_legal_information": {
+                        "is_enabled": false,
+                        "threshold": "medium"
+                    }
+                },
+                "trigger_action": {
+                    "type": "end_call"
+                }
+            },
+            "moderation": null,
+            "custom": {
+                "config": {
+                    "configs": []
+                }
+            }
+        },
+        "auth": {
+            "enable_auth": false,
+            "allowlist": [],
+            "require_origin_header": false
+        },
+        "call_limits": {
+            "agent_concurrency_limit": -1,
+            "daily_limit": 100000,
+            "bursting_enabled": true
+        },
+        "queueing_config": {
+            "enabled": false,
+            "wait_timeout_seconds": 180
+        },
+        "ban": null,
+        "smb_metadata": null,
+        "privacy": {
+            "record_voice": true,
+            "retention_days": -1,
+            "delete_transcript_and_pii": false,
+            "delete_audio": false,
+            "apply_to_existing_conversations": false,
+            "zero_retention_mode": false,
+            "nested_history_redaction": false,
+            "conversation_history_redaction": {
+                "enabled": false,
+                "entities": []
+            }
+        },
+        "trust_context": "unknown",
+        "analysis_llm": "gemini-2.5-flash",
+        "analysis_bedrock_llm": null,
+        "analysis_llm_billed": false,
+        "topic_discovery": {
+            "enabled": true
+        },
+        "sentiment_analysis": {
+            "enabled": true
+        },
+        "simulation_library": {
+            "enabled": false,
+            "test_ids": []
+        },
+        "overview_dashboard_template_id": null,
+        "safety": {
+            "is_blocked_ivc": false,
+            "is_blocked_non_ivc": false,
+            "ignore_safety_evaluation": false
+        }
+    },
+    "tags": [],
+    "workflow": {
+        "edges": {
+            "e_hazard": {
+                "source": "start_node",
+                "target": "safety",
+                "forward_condition": {
+                    "type": "llm",
+                    "condition": "The caller has mentioned any of the following, however briefly or uncertainly: a smell of gas, a gas leak, a suspected gas leak, carbon monoxide, a CO alarm, a carbon monoxide detector going off, or any alarm sounding in the building. Route here on any mention, including a hedged one such as 'I think I smell gas' or 'there might be a gas smell'. When in doubt, route here."
+                }
+            },
+            "e_normal": {
+                "source": "start_node",
+                "target": "dispatch",
+                "forward_condition": {
+                    "type": "unconditional"
+                }
+            },
+            "e_hazard_midcall": {
+                "source": "dispatch",
+                "target": "safety",
+                "forward_condition": {
+                    "type": "llm",
+                    "condition": "The caller has mentioned any of the following, however briefly or uncertainly: a smell of gas, a gas leak, a suspected gas leak, carbon monoxide, a CO alarm, a carbon monoxide detector going off, or any alarm sounding in the building. Route here on any mention, including a hedged one such as 'I think I smell gas' or 'there might be a gas smell'. When in doubt, route here."
+                }
+            }
+        },
+        "nodes": {
+            "start_node": {
+                "type": "start",
+                "position": {
+                    "x": 0,
+                    "y": 0
+                },
+                "edge_order": [
+                    "e_hazard",
+                    "e_normal"
+                ],
+                "parent_subgraph_id": null
+            },
+            "safety": {
+                "type": "override_agent",
+                "position": {
+                    "x": 340,
+                    "y": -140
+                },
+                "edge_order": [],
+                "parent_subgraph_id": null,
+                "conversation_config": {},
+                "additional_prompt": "A hazard has been reported. Nothing else in this call matters now.\n\nSay this, and only this:\n\n\"Stop what you're doing and leave the building now — don't touch any light switches or appliances on the way out. Once you're outside, call 911, then call the gas company. We can't send anyone until they've cleared it. Please go now.\"\n\nThen end the call.\n\nDo not triage the equipment. Do not ask diagnostic questions. Do not offer, hold, or book an appointment. Do not quote a price. Do not soften the instruction, add reassurance of your own, or improvise a warmer version of it.\n\nIf the caller asks anything at all — what it might be, whether someone can come out, what it will cost — do not answer. Repeat the instruction to get out and call 911, then end the call. A caller who is still on the phone with you is a caller who is still inside.",
+                "additional_knowledge_base": [],
+                "additional_tool_ids": [],
+                "label": "Hazard — evacuate",
+                "entry_behavior": "generate_immediately",
+                "forced_tool_name": null
+            },
+            "dispatch": {
+                "type": "override_agent",
+                "position": {
+                    "x": 340,
+                    "y": 140
+                },
+                "edge_order": [
+                    "e_hazard_midcall"
+                ],
+                "parent_subgraph_id": null,
+                "conversation_config": {},
+                "additional_prompt": "No hazard was reported. Handle this as a normal dispatch call, following the flow in your instructions: understand the problem, classify the urgency, confirm the full service address out loud, offer two windows, read the chosen window back and get an explicit yes, then book it.",
+                "additional_knowledge_base": [],
+                "additional_tool_ids": [],
+                "label": "Dispatch",
+                "entry_behavior": "auto",
+                "forced_tool_name": null
+            }
+        },
+        "subgraphs": {},
+        "prevent_subagent_loops": false
+    }
+}

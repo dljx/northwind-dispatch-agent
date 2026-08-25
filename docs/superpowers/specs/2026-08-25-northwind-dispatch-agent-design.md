@@ -152,7 +152,11 @@ The first message branches on `is_known_customer`, so unknown callers get a clea
 
 The branch is evaluated in the webhook, not in the prompt. `/api/conversation-init` already knows the answer, so it returns the finished greeting as a `first_message` override and the model is never given the opportunity to improvise a personalization failure — the exact failure the branch exists to prevent. This requires adding `first_message` to the overridable fields in the agent's Security tab.
 
-That branch is load-bearing for the widget, not just an edge case. The conversation-initiation webhook is Twilio-inbound-only — there is no caller ID on a web session, so widget conversations always arrive with `is_known_customer = false` and take the generic greeting. The widget is therefore a legitimate fallback demo surface, but it cannot show the personalized-open beat. Plan the recording accordingly.
+That branch is load-bearing for the widget, not just an edge case. The conversation-initiation webhook is Twilio-inbound-only — there is no caller ID on a web session, so widget conversations never trigger it.
+
+**This was resolved rather than accepted, because the widget became the demo surface.** Twilio does not provision numbers on trial accounts (§6), so there is no phone path to record. The resolution logic was therefore lifted out of the route handler into `resolveCaller`, and the widget page calls it server-side and hands the result to the widget as dynamic variables plus a `first_message` override. Same function, same query, same greeting — a different transport.
+
+Be precise about this on camera. What the widget exercises is the lookup; what it does not exercise is the webhook round-trip, because there is no caller ID for the platform to send. Claiming otherwise is the kind of thing this audience will catch.
 
 ### 4.3 Tools
 
@@ -241,7 +245,7 @@ Target runtime ~4:15 against a hard 5:00 cap, so roughly 45 seconds of slack.
 | Time | Beat |
 | --- | --- |
 | 0:00–0:25 | Cold open on the problem, not the stack. "Northwind runs 12 trucks. 40% of calls come after hours, hit voicemail, and half those people call a competitor." Straight into the call. |
-| 0:25–2:35 | Golden path, one continuous take. Split screen: phone left, dispatch board right. Personalized greeting → urgency triage → price curveball from KB → two slots → readback and confirm → Slack card lands, confirmation email arrives → call ends → board fills in with structured fields and eval scorecard. |
+| 0:25–2:35 | Golden path, one continuous take. Split screen: widget left, dispatch board right. Personalized greeting → urgency triage → price curveball from KB → two slots → readback and confirm → Slack card lands, confirmation email arrives → call ends → board fills in with structured fields and eval scorecard. |
 | 2:35–3:25 | The two memorable things. Conversation-init webhook: "that lookup happened during the ring — that's why there's no dead air." Then run the gas-leak line live and let them watch the agent refuse to book. |
 | 3:25–3:55 | Production posture, roughly 10 seconds each. `git diff` on the system prompt. One automated test running. Kill the Cal.com key live and show graceful degradation into human transfer. |
 | 3:55–4:15 | Close on cuts and next steps. "No auth on the board, single-tech calendar, no job-status lookup. Next: round-robin routing, batch outbound for reminders." |
@@ -262,7 +266,7 @@ Naming the cuts on camera is the strongest evidence of judgment in the video.
 
 | Risk | Mitigation |
 | --- | --- |
-| Twilio trial plays a warning before the agent answers | Not upgrading. The ~$20 buys about fifteen seconds of polish, not capability, and nothing in the scenario depends on it. Start the screen capture when the call connects — trimming the head of a clip is not editing the conversation — or narrate it in one line, which suits a video that already argues for naming your constraints out loud. Confirm in step 1 whether the trial flow also demands a keypress; sources disagree on whether that applies to inbound. |
+| **Twilio will not provision a number on a trial account at all** | Discovered during build, and it invalidates the earlier read that the ~$20 upgrade bought only polish. `AvailablePhoneNumbers` returns `This feature is not available on a Trial account`, and `IncomingPhoneNumbers` is empty — the console-only trial number is not a resource on the account and cannot be imported. Decision taken: stay free, and make the widget the demo surface (§4.2). The phone path remains a config change rather than a rewrite, because the webhook, the resolution logic and the dynamic variables are all built and tested. |
 | Twilio trial: SMS carries a trial-account prefix | The prefix would land inside the money shot, next to the dispatch board. Confirmations go out through Resend instead: free tier, no prefix, and it will send to your own address from `onboarding@resend.dev` with no domain verification. |
 | Reviewers cannot dial the demo number | Trial numbers accept calls only from verified numbers. Note it in the README. The recorded demo is unaffected. |
 | Free-tier services idle out before reviewers look | Supabase pauses a free project after about a week of inactivity, which would take the dispatch board down after submission. Either say so in the README or do not promise a live link. |
@@ -302,7 +306,7 @@ Dependency-first, so nothing blocks. Every step leaves a deployable state.
 - Single technician calendar rather than real round-robin routing.
 - No batch outbound reminders.
 - No job-status lookup. It was scoped and then cut: an endpoint, a tool and a workflow branch for a path the video never shows.
-- No marketing page. The widget cannot carry the personalized open (§4.2), which makes it a strictly worse surface than the phone.
+- ~~No marketing page.~~ **Reversed.** It was cut on the grounds that the widget could not carry the personalized open. Once Twilio turned out not to sell trial accounts a number, the widget became the only surface, and §4.2 shows the personalized open does work there by resolving server-side. The page is deliberately minimal — enough framing to make the widget make sense in frame, not a marketing site.
 - No SMS. The Twilio trial prefix would land inside the money shot, so confirmations go out by email. One channel either way — the adapter that would have switched between them was the thing worth cutting, not the channel.
 
 The last three were cut from this document rather than from the original plan, which is the point. Naming a cut is cheap; the version of scope judgment worth showing is the one where the endpoint does not exist.

@@ -14,13 +14,15 @@ BASE = "https://northwind-dispatch.vercel.app"
 API = "https://api.elevenlabs.io/v1/convai"
 
 KEY = os.environ["ELEVENLABS_API_KEY"]
-SECRET = os.environ["TOOL_SHARED_SECRET"]
+# Reference, not value. A literal here ends up in plaintext in the config that
+# `elevenlabs agents pull` writes into the repo — see docs/provisioned-resources.md.
+SECRET_ID = os.environ["NORTHWIND_SECRET_ID"]
 AGENT = os.environ["ELEVENLABS_AGENT_ID"]
 
 SERVICE_TYPES = ["hvac_no_heat", "hvac_no_cool", "plumbing_leak", "plumbing_clog", "other"]
 URGENCIES = ["emergency", "same_day", "routine"]
 
-HEADERS = {"x-northwind-secret": SECRET}
+HEADERS = {"x-northwind-secret": {"secret_id": SECRET_ID}}
 
 
 def prop(**kw):
