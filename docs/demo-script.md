@@ -1,10 +1,10 @@
 # Demo script
 
-Word for word, with tab cues. Target **4:46** against a hard 5:00 cap, taking Option A at the test segment.
+Word for word, with tab cues. Target **4:49** against a hard 5:00 cap, taking Option A at the test segment.
 
-Narration is ~144 seconds of it, measured. The two live conversations are the other ~150, and they
+Narration is ~139 seconds of it, measured. The two live conversations are the other ~150, and they
 are the part you do not control — so the narration is written tight on purpose. Read it
-as written and you land around 4:46. Improvise an extra sentence per segment and you are
+as written and you land around 4:49. Improvise an extra sentence per segment and you are
 over the cap with the close cut off.
 
 Two voices in this recording and it matters that they sound different:
@@ -52,9 +52,9 @@ Tabs 1 and 2 side by side for the call. Everything else is a switch.
 
 ## 0:00–0:20 · Cold open  → **TAB 1**
 
-> **NARRATION:** "Northwind runs twelve trucks. Forty percent of their calls come in
-> after hours, hit voicemail, and half those people call a competitor. This is Ava,
-> their after-hours dispatcher."
+> **NARRATION:** "Northwind's a heating and air conditioning contractor in Minneapolis —
+> twelve trucks. Forty percent of their calls come in after hours, hit voicemail, and half
+> those people call a competitor. This is Ava, their after-hours dispatcher."
 
 Beat.
 
@@ -62,6 +62,11 @@ Beat.
 > the web widget. Everything behind it is identical."
 
 Say that last part evenly. It is a constraint, not a confession.
+
+The business comes first and the scale second, deliberately. "Twelve trucks" is doing real
+work — it says mid-size regional contractor, which is the shape of customer this is built
+for — but it only means anything once the viewer knows what the trucks are for. Led with,
+it is a detail about nothing.
 
 ---
 
@@ -189,10 +194,10 @@ Then:
 ## 3:45–4:15 · The test  → **TAB 7**  ·  PICK ONE
 
 **You cannot keep this in full and also keep the price beat.** Measured: with this segment
-the video is **5:16**, sixteen seconds over the cap. Without it, **4:46**. Choose before
+the video is **5:19**, nineteen seconds over the cap. Without it, **4:49**. Choose before
 you record, not during.
 
-**Option A — cut it (recommended).** Lands at 4:46 with fourteen seconds of slack. The
+**Option A — cut it (recommended).** Lands at 4:49 with eleven seconds of slack. The
 two-bugs story is in the README, which reviewers read. What you keep instead is the
 knowledge base and the hallucination guard, which is the more distinctive thing: plenty of
 candidates write a test, almost none express a hallucination guard as a pass/fail metric
