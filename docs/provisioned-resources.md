@@ -58,8 +58,9 @@ Migration `0001_init.sql` applied. RLS enabled with no policies on all three tab
 verified by request: the publishable key returns `[]` for `customers`, the service role
 key returns rows.
 
-Seeded: `+15551234567` (Daryl Lee, Comfort Plan, 1400 Maple Ave) plus two filler
-customers and one open job so the board is not empty on the first take.
+Seeded: the demo caller (Comfort Plan, 1400 Maple Ave) plus two filler customers and one
+open job so the board is not empty on the first take. The demo number itself lives in
+`NORTHWIND_DEMO_CALLER`, not in the repo — it is a real mobile.
 
 ## ElevenLabs
 

@@ -25,7 +25,9 @@ export const dynamic = "force-dynamic";
  *   /?caller=+65…  any other number
  */
 
-const DEMO_CALLER = "+15551234567";
+// Which seeded customer the widget resolves. Configuration rather than a literal:
+// this is a real personal number, and the repo is public.
+const DEMO_CALLER = process.env.NORTHWIND_DEMO_CALLER ?? "";
 
 export default async function Home({
   searchParams,
