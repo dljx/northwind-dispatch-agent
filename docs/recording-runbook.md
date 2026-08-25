@@ -152,6 +152,8 @@ of a broken deploy you cannot recover mid-take.
 | Ava offers a 1am appointment | Cal.com schedule reverted to the account default (Asia/Singapore). Should be schedule `2279724`. |
 | Tools return 401 | Workspace secret `NORTHWIND_TOOL_SECRET` deleted or rotated. |
 | No email | Resend free tier only sends to the account's own address. |
+| "I'm having trouble reaching scheduling" | Read the tool result in the conversation transcript — the failure response now carries an `error` field the agent does not speak. |
+| Transfer fails on the widget | Expected. `transfer_to_number` only works on Twilio/Exotel/SIP calls, so on a web session Ava falls back to promising a callback and ending. Do not stage the escalation beat on the widget. |
 | Ava invents a price | The KB and the eval criterion have drifted apart. |
 
 ---

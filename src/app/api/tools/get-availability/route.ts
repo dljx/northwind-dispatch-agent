@@ -59,12 +59,14 @@ export async function POST(req: Request) {
       })),
     });
   } catch (err) {
-    console.error("get-availability failed", err);
+    const reason = err instanceof Error ? err.message : String(err);
+    console.error("get-availability failed", reason);
     return NextResponse.json({
       ok: false,
       speak: FAILURE_SPEAK,
       should_transfer: true,
       slots: [],
+      error: reason.slice(0, 300),
     });
   }
 }

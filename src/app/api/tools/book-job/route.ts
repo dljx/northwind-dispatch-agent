@@ -6,6 +6,7 @@ import { db } from "@/lib/supabase";
 import { createBooking } from "@/lib/calcom";
 import { pageOnCall, sendConfirmation, type JobCard } from "@/lib/notify";
 import { speakWindow, labelWindow } from "@/lib/speech";
+import { optionalEnv } from "@/lib/env";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -96,7 +97,11 @@ export async function POST(req: Request) {
     const booking = await createBooking({
       startIso: slotId,
       name,
-      email: email ?? "dispatch@northwind.example",
+      // Cal.com validates deliverability and rejects the booking outright if the
+      // attendee address cannot receive mail — a .example placeholder fails, and it
+      // fails for every unidentified caller, which is most of them. Unknown callers
+      // are booked against the dispatch desk instead.
+      email: email ?? optionalEnv("NORTHWIND_DISPATCH_EMAIL", ""),
       address,
       notes: issue,
     });
@@ -139,7 +144,16 @@ export async function POST(req: Request) {
       speak: `You're all set for ${spoken}.`,
     });
   } catch (err) {
-    console.error("book-job failed", err);
-    return NextResponse.json({ ok: false, speak: FAILURE_SPEAK, should_transfer: true });
+    // `speak` is the only field the agent voices. `error` rides along so the reason
+    // shows up in the conversation transcript instead of requiring a bisect through
+    // three vendors to find out that an email address was malformed.
+    const reason = err instanceof Error ? err.message : String(err);
+    console.error("book-job failed", reason);
+    return NextResponse.json({
+      ok: false,
+      speak: FAILURE_SPEAK,
+      should_transfer: true,
+      error: reason.slice(0, 300),
+    });
   }
 }
