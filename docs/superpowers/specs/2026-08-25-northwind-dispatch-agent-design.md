@@ -240,25 +240,33 @@ Runs in CI with `elevenlabs agents test <agent-id>`.
 
 ## 5. Demo choreography
 
-Target runtime ~4:15 against a hard 5:00 cap, so roughly 45 seconds of slack.
+Target runtime ~4:10 against a hard 5:00 cap, so roughly 50 seconds of slack.
 
 | Time | Beat |
 | --- | --- |
-| 0:00–0:25 | Cold open on the problem, not the stack. "Northwind runs 12 trucks. 40% of calls come after hours, hit voicemail, and half those people call a competitor." Straight into the call. |
-| 0:25–2:35 | Golden path, one continuous take. Split screen: widget left, dispatch board right. Personalized greeting → urgency triage → price curveball from KB → two slots → readback and confirm → Slack card lands, confirmation email arrives → call ends → board fills in with structured fields and eval scorecard. |
-| 2:35–3:25 | The two memorable things. Conversation-init webhook: "that lookup happened during the ring — that's why there's no dead air." Then run the gas-leak line live and let them watch the agent refuse to book. |
-| 3:25–3:55 | Production posture, roughly 10 seconds each. `git diff` on the system prompt. One automated test running. Kill the Cal.com key live and show graceful degradation into human transfer. |
-| 3:55–4:15 | Close on cuts and next steps. "No auth on the board, single-tech calendar, no job-status lookup. Next: round-robin routing, batch outbound for reminders." |
+| 0:00–0:20 | Cold open on the problem, not the stack. "Northwind runs twelve trucks. Forty percent of their calls come in after hours, hit voicemail, and half those people call a competitor." Then name the constraint once, flatly, and move on: "In production this is a phone number. Twilio won't provision one on a trial account, so I'm demoing on the widget — same agent, same webhooks, same everything behind them. I'll show you the one thing that changes." |
+| 0:20–2:20 | Golden path, one continuous take. Split screen: widget left, dispatch board right. Personalized open → urgency triage → price curveball from the knowledge base → two windows → readback and confirm → Slack card lands, confirmation email arrives → session ends → board fills in with structured fields and the eval scorecard. |
+| 2:20–3:05 | **The safety path, live.** Drop the gas-smell line mid-conversation, after Ava has already offered a window. Watch her abandon the booking, deliver the evacuation script, and end the call. Then say why: it is a workflow node with no outgoing edges, not a line in the prompt. |
+| 3:05–3:50 | Production posture, roughly ten seconds each. The simulation test running — and the two bugs it caught. `git diff` on the pulled agent config. Kill the Cal.com key live and watch it degrade into a human transfer. |
+| 3:50–4:10 | Close on cuts and next steps. "No phone number, no auth on the board, single-tech calendar, no job-status lookup. Next: round-robin routing across the twelve trucks, batch outbound for reminders." |
 
-**The slack is the point, not padding.** There is a live phone call in the middle of this take and its length is not fully under your control — a slower tool call, a wordier turn, a caller who pauses. Loom stops recording at 5:00 rather than letting the video run long, so an overrun does not produce a long video, it removes your close. Budget the drift.
+**The safety path is now the centerpiece, and that is the right response to losing the phone.** The original beat sheet led with the conversation-init webhook — "that lookup happened during the ring, that's why there's no dead air" — because on a phone it is genuinely startling. On a widget it is not: a signed-in site knowing who you are is unremarkable, and pretending otherwise in front of this audience is worse than not claiming it. The deterministic hazard path does not depend on the transport at all, and almost no take-home has one. Lead with the thing that survived.
 
-Two changes bought that margin. The standalone eval-criteria beat is gone from production posture, because the board already puts the scorecard on screen at 2:35 and showing it twice spends thirty seconds on one idea. And if a take still runs long, drop the price curveball: it is the only beat with a second home, since the knowledge base comes up again in the README.
+**The lookup beat still exists, just smaller and stated accurately.** Say it in one line during the golden path, as the greeting lands: "that greeting was resolved before the session opened, not fetched during it — the same endpoint runs on inbound caller ID while the phone is still ringing. The alternative is a mid-call lookup tool, and that is exactly where 'let me pull that up' and dead air come from." True on both transports, and it does not overclaim what the widget is doing.
 
-The golden path runs a **same-day urgent** call, not an emergency. §4.2 sends true emergencies to a priority slot rather than a two-slot offer, and the gas-leak segment already owns the emergency register — running both blurs two branches that should read as distinct.
+**The slack is the point, not padding.** There is a live voice session in the middle of this take and its length is not fully under your control — a slower tool call, a wordier turn, a pause. Loom stops recording at 5:00 rather than letting the video run long, so an overrun does not produce a long video, it removes your close. Budget the drift.
 
-**Recording craft.** Shoot the call in one take; do five or six and keep the best. Editing a voice demo is a lie people can hear. Keep Slack and the board visible simultaneously so nobody wonders whether it was staged. If there is a pause, narrate it rather than apologizing. Do not manufacture a fumble to sound natural: it contradicts keeping the best of six takes, and a staged mistake is the one flaw a viewer might actually catch. Six real takes produce enough real disfluency on their own.
+If a take runs long, drop the price curveball first: it is the only beat with a second home, since the knowledge base comes up again in the README.
 
-Naming the cuts on camera is the strongest evidence of judgment in the video.
+The golden path runs a **same-day urgent** call, not an emergency. §4.2 sends true emergencies to a priority window rather than a two-window offer, and the safety segment already owns the emergency register — running both blurs two branches that should read as distinct.
+
+**Show the test failing before it passes.** The strongest ten seconds in the production-posture segment is not "here is a test, it is green." It is that the test caught two bugs no amount of reading the graph would have: hazards raised mid-call were not being routed at all, and the safety node never got to speak because its outgoing edge fired on entry. Keep a screenshot of the failing run. A test that has never failed is decoration; one that caught a real defect in the exact path you are claiming is deterministic is the argument.
+
+**Recording craft.** Shoot the conversation in one take; do five or six and keep the best. Editing a voice demo is a lie people can hear. Keep Slack and the board visible simultaneously so nobody wonders whether it was staged. If there is a pause, narrate it rather than apologising. Do not manufacture a fumble to sound natural: it contradicts keeping the best of six takes, and a staged mistake is the one flaw a viewer might actually catch. Six real takes produce enough real disfluency on their own.
+
+Everything is now in one browser, which is a small gift — no phone to hold, no camera pointed at a screen, and the board, Slack and the widget can share one clean frame. Use a second display for the terminal so the `git diff` and the test run do not require alt-tabbing mid-take.
+
+Naming the cuts on camera is the strongest evidence of judgment in the video. There is one more of them now than there was, and the honest version of "no phone number" is considerably more interesting than the tidy version.
 
 ---
 
