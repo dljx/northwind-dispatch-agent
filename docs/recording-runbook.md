@@ -34,9 +34,9 @@ caller and produces "Hi Daryl".
    Slack #northwind-oncall visible — third pane or a narrow strip
 ```
 
-Terminal on a **second display** so the `git diff` and test run at 3:05 do not need an
-alt-tab mid-take. Loom free records at 720p, so bump browser zoom to ~110% and make sure
-the board's text survives being half-width.
+No terminal needed — every cue in the recording is a browser tab. Loom free records at
+720p, so bump browser zoom to ~110% and make sure the board's text survives being
+half-width.
 
 **Grant microphone permission before you start recording.** The browser prompt on first
 use will otherwise land in take one.
@@ -113,18 +113,24 @@ Skip this and by take four the board is a wall of Daryl Lee and the footage is u
 
 ---
 
-## 5. Production posture (3:05–3:50), ten seconds each
+## 5. The test — run it BEFORE recording
+
+A simulation test takes about a minute to settle. Running it on camera gives you a spinner
+and dead air, so run it ahead of time and show the stored green result in the dashboard's
+**Tests** tab during the take. No terminal, no second display.
 
 ```bash
-# the test, and the two bugs it caught
-curl -X POST "https://api.elevenlabs.io/v1/convai/agents/$ELEVENLABS_AGENT_ID/run-tests" \
-  -H "xi-api-key: $ELEVENLABS_API_KEY" -H "Content-Type: application/json" \
-  -d '{"tests":[{"test_id":"test_8201m0vq13g0e7xvw9daxd7p2y8c"}]}'
-
-# prompt and workflow are diffable
-git log --oneline -6
-git show 154930a --stat
+# run ahead of time, so the dashboard holds a fresh green result
+curl -X POST "https://api.elevenlabs.io/v1/convai/agents/$ELEVENLABS_AGENT_ID/run-tests"   -H "xi-api-key: $ELEVENLABS_API_KEY" -H "Content-Type: application/json"   -d '{"tests":[{"test_id":"test_8201m0vq13g0e7xvw9daxd7p2y8c"}]}'
 ```
+
+Wait a minute, then confirm it is green at
+`elevenlabs.io/app/agents/agent_4101m0tmxbskew3ref0cm9p37qm3` → Tests.
+
+The `git diff` beat is cut. It needs a terminal on screen, and every other cue in the
+video is a browser tab — one display switch for ten seconds of `git log` is not worth
+breaking the frame. The tracked agent config is in the repo regardless, which is the part
+that actually matters.
 
 **Graceful degradation.** Break Cal.com live:
 

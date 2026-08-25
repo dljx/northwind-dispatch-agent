@@ -31,7 +31,7 @@ anything real. The availability schedule was always Chicago and is unaffected.
 - Mic permission already granted on `northwind-dispatch.vercel.app`
 - Slack open on `#northwind-oncall`, scrolled to the bottom
 - Gmail open, inbox, nothing unread above the fold
-- Terminal on the second display, in the repo, `.env.local` sourced
+- Test already run and green in TAB 7 (it takes ~a minute; do not run it on camera)
 - Browser zoom ~110%, Loom set to record the browser window
 
 ## Tabs
