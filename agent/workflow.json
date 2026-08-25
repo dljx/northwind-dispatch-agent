@@ -19,12 +19,13 @@
       },
       "backward_condition": null
     },
-    "e_safety_end": {
-      "source": "safety",
-      "target": "hangup",
+    "e_hazard_midcall": {
+      "source": "dispatch",
+      "target": "safety",
       "forward_condition": {
         "label": null,
-        "type": "unconditional"
+        "type": "llm",
+        "condition": "The caller has mentioned any of the following, however briefly or uncertainly: a smell of gas, a gas leak, a suspected gas leak, carbon monoxide, a CO alarm, a carbon monoxide detector going off, or any alarm sounding in the building. Route here on any mention, including a hedged one such as 'I think I smell gas' or 'there might be a gas smell'. When in doubt, route here."
       },
       "backward_condition": null
     }
@@ -48,16 +49,14 @@
         "x": 340.0,
         "y": -140.0
       },
-      "edge_order": [
-        "e_safety_end"
-      ],
+      "edge_order": [],
       "parent_subgraph_id": null,
       "conversation_config": {},
       "additional_prompt": "A hazard has been reported. Nothing else in this call matters now.\n\nSay this, and only this:\n\n\"Stop what you're doing and leave the building now — don't touch any light switches or appliances on the way out. Once you're outside, call 911, then call the gas company. We can't send anyone until they've cleared it. Please go now.\"\n\nThen end the call.\n\nDo not triage the equipment. Do not ask diagnostic questions. Do not offer, hold, or book an appointment. Do not quote a price. Do not soften the instruction, add reassurance of your own, or improvise a warmer version of it.\n\nIf the caller asks anything at all — what it might be, whether someone can come out, what it will cost — do not answer. Repeat the instruction to get out and call 911, then end the call. A caller who is still on the phone with you is a caller who is still inside.",
       "additional_knowledge_base": [],
       "additional_tool_ids": [],
       "label": "Hazard — evacuate",
-      "entry_behavior": "auto",
+      "entry_behavior": "generate_immediately",
       "forced_tool_name": null
     },
     "dispatch": {
@@ -66,7 +65,9 @@
         "x": 340.0,
         "y": 140.0
       },
-      "edge_order": [],
+      "edge_order": [
+        "e_hazard_midcall"
+      ],
       "parent_subgraph_id": null,
       "conversation_config": {},
       "additional_prompt": "No hazard was reported. Handle this as a normal dispatch call, following the flow in your instructions: understand the problem, classify the urgency, confirm the full service address out loud, offer two windows, read the chosen window back and get an explicit yes, then book it.",
@@ -75,16 +76,6 @@
       "label": "Dispatch",
       "entry_behavior": "auto",
       "forced_tool_name": null
-    },
-    "hangup": {
-      "type": "end",
-      "position": {
-        "x": 700.0,
-        "y": -140.0
-      },
-      "edge_order": [],
-      "parent_subgraph_id": null,
-      "return_when_nested": true
     }
   },
   "subgraphs": {},

@@ -47,22 +47,25 @@ workflow = {
             "label": "Hazard — evacuate",
             "additional_prompt": SAFETY_SCRIPT,
             "position": {"x": 340, "y": -140},
-            "edge_order": ["e_safety_end"],
+            "edge_order": [],
+            "entry_behavior": "generate_immediately",
         },
         "dispatch": {
             "type": "override_agent",
             "label": "Dispatch",
             "additional_prompt": DISPATCH_PROMPT,
             "position": {"x": 340, "y": 140},
-            "edge_order": [],
-        },
-        "hangup": {
-            "type": "end",
-            "label": "End call",
-            "position": {"x": 700, "y": -140},
-            "edge_order": [],
+            "edge_order": ["e_hazard_midcall"],
         },
     },
+    # safety has no outgoing edges. It is a sink: once the conversation is there it
+    # cannot route anywhere, which is a stronger guarantee than "the only edge out goes
+    # to an end node". The call is ended by the agent calling end_call, per the script.
+    #
+    # The earlier version had safety -> hangup as unconditional, and that edge fired the
+    # instant the node was entered — the workflow advanced to the end node before the
+    # agent was ever given a turn to speak. The hazard routing was working; the script
+    # was simply never said. Only a simulation test surfaced that.
     "edges": {
         # Order matters. Hazard is evaluated first, so a caller who leads with
         # "my furnace is dead and I smell gas" never reaches triage.
@@ -76,12 +79,14 @@ workflow = {
             "target": "dispatch",
             "forward_condition": {"type": "unconditional"},
         },
-        # Deliberately the only edge out of safety. There is no route from the
-        # hazard path back into booking.
-        "e_safety_end": {
-            "source": "safety",
-            "target": "hangup",
-            "forward_condition": {"type": "unconditional"},
+        # A hazard raised mid-call must route too. The start node is evaluated once,
+        # so without this edge a caller who opens with the furnace and mentions the gas
+        # smell three turns later stays in dispatch forever — which is precisely the
+        # scenario the demo runs. Found by a simulation test, not by reading the graph.
+        "e_hazard_midcall": {
+            "source": "dispatch",
+            "target": "safety",
+            "forward_condition": {"type": "llm", "condition": HAZARD_CONDITION},
         },
     },
 }

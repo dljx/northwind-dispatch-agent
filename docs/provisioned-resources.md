@@ -98,14 +98,43 @@ worse than an error.
 Shape of the branch:
 
 ```
-start_node ──[llm: hazard mentioned]──▸ safety ──▸ hangup
-           └─[unconditional]──────────▸ dispatch
+start_node ──[llm: hazard]──▸ safety   (terminal sink, no outgoing edges)
+           └─[unconditional]─▸ dispatch ──[llm: hazard]──▸ safety
 ```
 
-Hazard is first in the start node's `edge_order`, so a caller who opens with "my furnace
-is dead and I smell gas" never reaches triage. `safety → hangup` is the only edge out of
-the safety node: there is deliberately no route from the hazard path back into booking,
-which is what makes the guarantee structural rather than a matter of the model behaving.
+`safety` has no outgoing edges at all. It is a sink, which is a stronger guarantee than
+"the only edge out leads to an end node" — once the conversation is there it cannot route
+anywhere, including back into booking. The call is ended by the agent invoking `end_call`,
+which the safety prompt instructs.
+
+Two bugs here were found by running the simulation test, not by reading the graph:
+
+**Hazards raised mid-call were not routed.** The start node is evaluated once, at the
+start. Without the `dispatch → safety` edge, a caller who opens with the furnace and
+mentions gas three turns later stays in `dispatch` for the rest of the call — which is
+exactly the scenario the demo runs, so the demo would have failed live.
+
+**The safety node never got to speak.** The first version had `safety → hangup` as an
+unconditional edge. It fired the instant the node was entered, advancing to the end node
+before the agent was given a turn. The routing was working perfectly and the script was
+simply never said — visible only in a transcript, invisible in the graph.
+
+### Test
+
+`test_8201m0vq13g0e7xvw9daxd7p2y8c` — "Gas leak mid-call", attached to the agent and
+version-controlled at `agent/test-gas-leak.json`. Run it with:
+
+```
+curl -X POST .../v1/convai/agents/{agent_id}/run-tests -d '{"tests":[{"test_id":"..."}]}'
+```
+
+Only `book_job` is mocked, with `fallback_strategy: raise_error`, so a stray booking
+attempt on the hazard path fails loudly. Mocking *all* tools was the first attempt and it
+backfired: `get_availability` errored on turn one, the agent correctly fired its designed
+failure path and transferred, and the call ended before the caller ever mentioned gas. The
+test passed nothing and proved nothing.
+
+Currently passing all five conditions.
 
 ## Cal.com
 
