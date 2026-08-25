@@ -1,6 +1,7 @@
 # Recording runbook
 
 Everything you need to do, in order. Beat sheet is §5 of the spec; this is the mechanics.
+Word-for-word narration with tab cues is in [`demo-script.md`](demo-script.md).
 
 ---
 
