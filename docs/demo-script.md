@@ -1,10 +1,10 @@
 # Demo script
 
-Word for word, with tab cues. Target **4:45** against a hard 5:00 cap.
+Word for word, with tab cues. Target **4:47** against a hard 5:00 cap.
 
-Narration is ~145 seconds of it, measured. The two live conversations are the other ~140, and they
+Narration is ~148 seconds of it, measured. The two live conversations are the other ~140, and they
 are the part you do not control — so the narration is written tight on purpose. Read it
-as written and you land around 4:45. Improvise an extra sentence per segment and you are
+as written and you land around 4:47. Improvise an extra sentence per segment and you are
 over the cap with the close cut off.
 
 Two voices in this recording and it matters that they sound different:
@@ -68,9 +68,9 @@ Say that last part evenly. It is a constraint, not a confession.
 
 Not a diagram. Four real screens, about seven seconds each.
 
-> **NARRATION:** "Quick orientation. **[TAB 1]** Customer side — one page, one widget.
-> **[TAB 2]** What dispatch sees. **[TAB 5]** A real Cal.com calendar. **[TAB 6]** Postgres
-> underneath. One Next.js app on Vercel serves all of it plus the routes the agent calls."
+> **NARRATION:** "Orientation. **[TAB 1]** Customer side. **[TAB 2]** What dispatch sees.
+> **[TAB 5]** A real Cal.com calendar. **[TAB 6]** Postgres underneath. One Next.js app
+> serves all of it."
 
 **→ back to TAB 1**, board visible alongside.
 
@@ -115,9 +115,10 @@ She books. **Say nothing** while the board fills in — that silence is the payo
 
 Then, one line only:
 
-> **NARRATION:** "That greeting was resolved before the session opened — on a phone, the
-> same endpoint runs while the line is still ringing. The alternative is a lookup tool,
-> and that's where 'let me pull that up' comes from."
+> **NARRATION:** "She knew who I was before she said a word. That lookup runs before the
+> conversation starts — on a phone, while it's still ringing. The obvious alternative is
+> to make it a tool she calls mid-conversation, but then she has to stall while it runs.
+> That's where 'let me pull that up' and a second of silence come from."
 
 ---
 
@@ -131,8 +132,9 @@ Quick. Six seconds a tab. You are answering "is any of this actually wired up?"
 
 Then the design point, which is the actual reason to show it:
 
-> "Only the calendar write is awaited. Slack and the email fire after the response goes
-> back — three vendors in series inside a live call is where dead air comes from."
+> "That was one tool call, but only the calendar write made her wait. Slack and the email
+> went out after she'd already answered. Wait on all three and the caller sits in silence
+> for as long as the slowest one takes."
 
 **→ TAB 1**
 
@@ -146,7 +148,8 @@ get to the gas line quickly once she has offered a window.
 Fresh session. Reset first if you have time; if not, the board carrying one extra row is
 survivable.
 
-> **NARRATION:** "Now the one that matters."
+> **NARRATION:** "Everything so far is convenience — if booking breaks, someone waits
+> longer for a technician. This one's different."
 
 Start the session.
 
@@ -164,8 +167,8 @@ Push once:
 Then:
 
 > **NARRATION:** "She'd already offered a window, and she dropped it. That's not the
-> prompt asking nicely — it's a workflow node with no outgoing edges. There's no path back
-> to booking. A gas leak shouldn't be left to the model's judgment."
+> prompt asking nicely — it's a workflow node with no way out. A gas leak shouldn't be
+> left to the model's judgment."
 
 ---
 
@@ -179,9 +182,8 @@ Run the test (curl is in the runbook).
 
 Beat.
 
-> "It earned its place — it caught two bugs I'd never have found reading the graph.
-> Hazards raised mid-call weren't routing at all, and the safety node never got to speak,
-> because its outgoing edge fired the moment it was entered."
+> "It caught two bugs I'd never have found reading the graph — hazards raised mid-call
+> weren't routing at all, and the safety node never got to speak."
 
 If you have the failing-run screenshot, show it here for two seconds.
 
@@ -195,8 +197,8 @@ Land on the board.
 > design choice. No auth on the board. Single technician calendar. No job-status lookup —
 > scoped, then cut, because the demo never shows it."
 
-> "The phone path is a config change, not a rewrite: the webhook and the lookup are
-> already built and tested. Thanks for watching."
+> "The phone path is a config change, not a rewrite — it's built and tested already.
+> Thanks for watching."
 
 ---
 
@@ -204,9 +206,15 @@ Land on the board.
 
 Drop in this order:
 
-1. **TAB 4, the email** in the proof tour. Slack already makes the same point.
-2. **The failing-test screenshot.** Say it instead of showing it.
-3. **TAB 5 and 6** in the architecture tour — do it with two tabs, not four.
+1. **TAB 4, the email** in the proof tour. Slack already makes the same point. (~4s)
+2. **The failing-test screenshot.** Say it instead of showing it. (~3s)
+3. **TAB 5 and 6** in the architecture tour — two tabs, not four. (~6s)
+4. **The second half of the fan-out explanation** — "Wait on all three and the caller sits
+   in silence." Keep the first half; the point survives. (~7s)
+
+Do not cut the three explanations wholesale. They are the only places the video says *why*
+any of this was built the way it was, and for this audience that is the entire content.
+Everything else is just showing that it runs.
 
 Do not cut the pause after the personalized greeting, and do not cut the silence while
 the board fills in. Those two silences are doing more work than any sentence here.
