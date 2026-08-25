@@ -1,10 +1,10 @@
 # Demo script
 
-Word for word, with tab cues. Target **4:35** against a hard 5:00 cap.
+Word for word, with tab cues. Target **4:45** against a hard 5:00 cap.
 
-Narration is ~135 seconds of it. The two live conversations are the other ~140, and they
+Narration is ~145 seconds of it, measured. The two live conversations are the other ~140, and they
 are the part you do not control — so the narration is written tight on purpose. Read it
-as written and you land around 4:35. Improvise an extra sentence per segment and you are
+as written and you land around 4:45. Improvise an extra sentence per segment and you are
 over the cap with the close cut off.
 
 Two voices in this recording and it matters that they sound different:
