@@ -44,6 +44,7 @@ anything real. The availability schedule was always Chicago and is unaffected.
 | 4 | Gmail | your dispatch inbox |
 | 5 | Cal.com | app.cal.com/bookings/upcoming |
 | 6 | Supabase | table editor, `jobs` table |
+| 7 | ElevenLabs Tests | elevenlabs.io/app/agents/`agent_4101…` → **Tests** tab |
 
 Tabs 1 and 2 side by side for the call. Everything else is a switch.
 
@@ -172,20 +173,30 @@ Then:
 
 ---
 
-## 3:45–4:15 · Production posture  → **TERMINAL**
+## 3:45–4:15 · The test  → **TAB 7**
 
-Run the test (curl is in the runbook).
+**Optional.** The brief does not ask for this. It is the beat that says "not a toy", and
+it is the strongest engineering signal in the video — but if a take is running long, this
+is the segment to lose. See "If it runs long".
 
-> **NARRATION:** "There's an automated test pinning that path — the caller mentions gas
-> two turns in and pushes twice for an appointment. It asserts she evacuates and books
-> nothing."
+**Do not run it live.** A simulation test takes about a minute to settle. Hit run on
+camera and you get a spinner and dead air. Open **TAB 7** on the last completed run — it
+is green, with all five conditions listed — and talk over it.
+
+No terminal, no second display: it is a browser tab like everything else, and showing the
+platform's own testing surface reads better to this audience than a curl would.
+
+> **NARRATION:** "There's an automated test pinning that path. The simulated caller
+> mentions gas two turns in and pushes twice for an appointment. It asserts she evacuates
+> and books nothing."
 
 Beat.
 
 > "It caught two bugs I'd never have found reading the graph — hazards raised mid-call
 > weren't routing at all, and the safety node never got to speak."
 
-If you have the failing-run screenshot, show it here for two seconds.
+If you kept the failing-run screenshot, two seconds here. If not, the sentence carries it
+on its own — do not stall looking for the file.
 
 ---
 
@@ -209,7 +220,10 @@ Drop in this order:
 1. **TAB 4, the email** in the proof tour. Slack already makes the same point. (~4s)
 2. **The failing-test screenshot.** Say it instead of showing it. (~3s)
 3. **TAB 5 and 6** in the architecture tour — two tabs, not four. (~6s)
-4. **The second half of the fan-out explanation** — "Wait on all three and the caller sits
+4. **The whole test segment.** It is optional and it is ~30s — the single biggest saving
+   available. Losing it costs you the strongest engineering beat, so take it last, but it
+   is there if a take overruns badly.
+5. **The second half of the fan-out explanation** — "Wait on all three and the caller sits
    in silence." Keep the first half; the point survives. (~7s)
 
 Do not cut the three explanations wholesale. They are the only places the video says *why*
