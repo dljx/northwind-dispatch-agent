@@ -13,6 +13,7 @@ human when she is out of her depth.
 - **Board:** https://northwind-dispatch.vercel.app/dispatch — what dispatch sees
 - **Design:** [`docs/superpowers/specs/`](docs/superpowers/specs/) — the spec this was built from
 - **Resources:** [`docs/provisioned-resources.md`](docs/provisioned-resources.md) — every id, and the traps
+- **Recording:** [`docs/recording-runbook.md`](docs/recording-runbook.md) — how the demo gets shot
 
 ---
 
